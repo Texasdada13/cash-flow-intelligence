@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2><i class="bi bi-speedometer2 me-2"></i>Dashboard</h2>
+            <p class="text-muted mb-0">Monitor and manage your companies' cash flow</p>
+        </div>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCompanyModal">
+            <i class="bi bi-plus-lg me-2"></i>Add Company
+        </button>
+    </div>
+
+    {% if companies %}
+    <!-- Companies Grid -->
+    <div class="row g-4">
+        {% for company in companies %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h5 class="card-title mb-1">{{ company.name }}</h5>
+                            <small class="text-muted">{{ company.industry or 'General Business' }}</small>
+                        </div>
+                        {% if company.health_score %}
+                        <div class="text-end">
+                            <div class="health-score {{ 'score-excellent' if company.health_score >= 80 else 'score-good' if company.health_score >= 70 else 'score-fair' if company.health_score >= 60 else 'score-poor' if company.health_score >= 40 else 'score-critical' }}" style="font-size: 1.5rem;">
+                                {{ "%.0f"|format(company.health_score) }}
+                            </div>
+                            <small class="text-muted">Health Score</small>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    {% if company.risk_level %}
+                    <div class="mb-3">
+                        <span class="badge {{ 'risk-low' if company.risk_level == 'Low' else 'risk-medium' if company.risk_level == 'Medium' else 'risk-high' if company.risk_level == 'High' else 'risk-critical' }}">
+                            {{ company.risk_level }} Risk
+                        </span>
+                        {% if company.cash_runway_months %}
+                        <span class="badge bg-secondary ms-1">
+                            {{ "%.1f"|format(company.cash_runway_months) }}mo runway
+                        </span>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+
+                    <div class="d-flex gap-2 mt-auto">
+                        <a href="/company/{{ company.id }}" class="btn btn-outline-primary btn-sm flex-fill">
+                            <i class="bi bi-eye me-1"></i>View
+                        </a>
+                        <a href="/chat/{{ company.id }}" class="btn btn-primary btn-sm flex-fill">
+                            <i class="bi bi-chat-dots me-1"></i>Chat
+                        </a>
+                    </div>
+                </div>
+                <div class="card-footer bg-white border-top-0">
+                    <small class="text-muted">
+                        {% if company.last_analysis_date %}
+                        Last analyzed: {{ company.last_analysis_date.strftime('%b %d, %Y') }}
+                        {% else %}
+                        No analysis yet
+                        {% endif %}
+                    </small>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <!-- Empty State -->
+    <div class="text-center py-5">
+        <i class="bi bi-building text-muted" style="font-size: 5rem;"></i>
+        <h4 class="mt-4">No companies yet</h4>
+        <p class="text-muted">Add your first company to start tracking cash flow</p>
+        <button class="btn btn-primary mt-2" data-bs-toggle="modal" data-bs-target="#addCompanyModal">
+            <i class="bi bi-plus-lg me-2"></i>Add Company
+        </button>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Add Company Modal -->
+<div class="modal fade" id="addCompanyModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Company</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addCompanyForm">
+                    <div class="mb-3">
+                        <label class="form-label">Company Name *</label>
+                        <input type="text" class="form-control" id="companyName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Industry</label>
+                        <select class="form-select" id="companyIndustry">
+                            <option value="">Select industry...</option>
+                            <option value="technology">Technology</option>
+                            <option value="retail">Retail</option>
+                            <option value="manufacturing">Manufacturing</option>
+                            <option value="services">Professional Services</option>
+                            <option value="healthcare">Healthcare</option>
+                            <option value="construction">Construction</option>
+                            <option value="food_beverage">Food & Beverage</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Revenue Range</label>
+                        <select class="form-select" id="companyRevenue">
+                            <option value="">Select range...</option>
+                            <option value="<500K">Under $500K</option>
+                            <option value="500K-1M">$500K - $1M</option>
+                            <option value="1M-5M">$1M - $5M</option>
+                            <option value="5M-10M">$5M - $10M</option>
+                            <option value="10M-50M">$10M - $50M</option>
+                            <option value=">50M">Over $50M</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-control" id="companyDescription" rows="2"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="addCompany()">Add Company</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+async function addCompany() {
+    const data = {
+        name: document.getElementById('companyName').value,
+        industry: document.getElementById('companyIndustry').value,
+        revenue_range: document.getElementById('companyRevenue').value,
+        description: document.getElementById('companyDescription').value
+    };
+
+    if (!data.name) {
+        alert('Company name is required');
+        return;
+    }
+
+    try {
+        const result = await apiCall('/api/companies', 'POST', data);
+        if (result.success) {
+            window.location.href = '/company/' + result.company.id;
+        }
+    } catch (error) {
+        alert('Error: ' + error.message);
+    }
+}
+</script>
+{% endblock %}

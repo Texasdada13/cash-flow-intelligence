@@ -1,0 +1,39 @@
+# Flask web framework
+Flask==3.0.0
+Flask-SQLAlchemy==3.1.1
+Flask-Limiter==3.5.0
+Flask-Login==0.6.3
+Werkzeug==3.0.1
+
+# Database
+SQLAlchemy==2.0.23
+psycopg2-binary==2.9.9
+
+# Anthropic Claude AI
+anthropic==0.52.0
+
+# Time Series Forecasting
+prophet==1.1.5
+statsmodels==0.14.1
+
+# Data Processing
+pandas==2.1.4
+numpy==1.26.2
+scipy==1.11.4
+
+# Data Validation
+email-validator==2.1.0
+python-dateutil==2.8.2
+
+# Document Generation
+python-docx==1.1.0
+reportlab==4.0.7
+openpyxl==3.1.2
+
+# Security
+bcrypt==4.1.1
+python-dotenv==1.0.0
+
+# Utilities
+uuid==1.30
+gunicorn==21.2.0

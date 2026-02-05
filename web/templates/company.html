@@ -1,0 +1,317 @@
+{% extends "base.html" %}
+
+{% block title %}{{ company.name }} - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-start mb-4">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/dashboard">Dashboard</a></li>
+                    <li class="breadcrumb-item active">{{ company.name }}</li>
+                </ol>
+            </nav>
+            <h2>{{ company.name }}</h2>
+            <p class="text-muted mb-0">{{ company.industry or 'General Business' }} | {{ company.revenue_range or 'Revenue not specified' }}</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="/chat/{{ company.id }}" class="btn btn-primary">
+                <i class="bi bi-chat-dots me-2"></i>AI Consultant
+            </a>
+            <a href="/forecasts/{{ company.id }}" class="btn btn-outline-primary">
+                <i class="bi bi-graph-up me-2"></i>Forecasts
+            </a>
+            <a href="/benchmarks/{{ company.id }}" class="btn btn-outline-secondary">
+                <i class="bi bi-bar-chart me-2"></i>Benchmarks
+            </a>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card metric-card">
+                <div class="metric-value {{ 'score-excellent' if company.health_score and company.health_score >= 80 else 'score-good' if company.health_score and company.health_score >= 70 else 'score-fair' if company.health_score and company.health_score >= 60 else 'score-poor' if company.health_score and company.health_score >= 40 else 'score-critical' if company.health_score else '' }}">
+                    {{ "%.0f"|format(company.health_score) if company.health_score else '--' }}
+                </div>
+                <div class="metric-label">Health Score</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card metric-card">
+                <div class="metric-value">
+                    {% if company.risk_level %}
+                    <span class="badge {{ 'risk-low' if company.risk_level == 'Low' else 'risk-medium' if company.risk_level == 'Medium' else 'risk-high' if company.risk_level == 'High' else 'risk-critical' }} fs-5">
+                        {{ company.risk_level }}
+                    </span>
+                    {% else %}
+                    --
+                    {% endif %}
+                </div>
+                <div class="metric-label">Risk Level</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card metric-card">
+                <div class="metric-value">
+                    {{ "%.1f"|format(company.cash_runway_months) if company.cash_runway_months else '--' }}
+                </div>
+                <div class="metric-label">Cash Runway (Months)</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card metric-card">
+                <div class="metric-value">
+                    {{ periods|length }}
+                </div>
+                <div class="metric-label">Periods Tracked</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Financial Periods -->
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-calendar me-2"></i>Financial Periods</h5>
+                    <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addPeriodModal">
+                        <i class="bi bi-plus-lg me-1"></i>Add Period
+                    </button>
+                </div>
+                <div class="card-body p-0">
+                    {% if periods %}
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th>Period</th>
+                                    <th class="text-end">Revenue</th>
+                                    <th class="text-end">Net Income</th>
+                                    <th class="text-end">Cash</th>
+                                    <th class="text-center">Current Ratio</th>
+                                    <th class="text-center">Gross Margin</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for period in periods %}
+                                <tr>
+                                    <td>{{ period.period_label or period.period_date.strftime('%b %Y') }}</td>
+                                    <td class="text-end">${{ "{:,.0f}".format(period.revenue or 0) }}</td>
+                                    <td class="text-end {{ 'text-success' if (period.net_income or 0) >= 0 else 'text-danger' }}">
+                                        ${{ "{:,.0f}".format(period.net_income or 0) }}
+                                    </td>
+                                    <td class="text-end">${{ "{:,.0f}".format(period.cash or 0) }}</td>
+                                    <td class="text-center">{{ "%.2f"|format(period.current_ratio) if period.current_ratio else '--' }}</td>
+                                    <td class="text-center">{{ "%.1f%%"|format(period.gross_margin) if period.gross_margin else '--' }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-calendar-x text-muted" style="font-size: 3rem;"></i>
+                        <p class="mt-3 text-muted">No financial periods yet. Add your first period.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions & Forecast -->
+        <div class="col-lg-4">
+            {% if forecast %}
+            <div class="card mb-3">
+                <div class="card-header">
+                    <i class="bi bi-graph-up me-2"></i>Latest Forecast
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Scenario:</span>
+                        <span class="badge bg-secondary">{{ forecast.scenario }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Runway:</span>
+                        <strong>{{ "%.1f"|format(forecast.runway_months) if forecast.runway_months else 'N/A' }} months</strong>
+                    </div>
+                    {% if forecast.zero_cash_date %}
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Zero Cash Date:</span>
+                        <span class="text-danger">{{ forecast.zero_cash_date.strftime('%b %d, %Y') }}</span>
+                    </div>
+                    {% endif %}
+                    <a href="/forecasts/{{ company.id }}" class="btn btn-outline-primary btn-sm w-100 mt-2">
+                        View All Forecasts
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="card">
+                <div class="card-header">
+                    <i class="bi bi-lightning me-2"></i>Quick Actions
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-success" onclick="generateForecast()">
+                            <i class="bi bi-graph-up me-2"></i>Generate Forecast
+                        </button>
+                        <a href="/benchmarks/{{ company.id }}" class="btn btn-outline-primary">
+                            <i class="bi bi-bar-chart me-2"></i>Run Benchmark Analysis
+                        </a>
+                        <a href="/chat/{{ company.id }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-chat-dots me-2"></i>Ask AI Consultant
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Period Modal -->
+<div class="modal fade" id="addPeriodModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Financial Period</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addPeriodForm">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Period Date *</label>
+                            <input type="date" class="form-control" id="periodDate" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Period Label</label>
+                            <input type="text" class="form-control" id="periodLabel" placeholder="e.g., Jan 2024">
+                        </div>
+
+                        <div class="col-12"><hr><h6>Income Statement</h6></div>
+                        <div class="col-md-4">
+                            <label class="form-label">Revenue ($)</label>
+                            <input type="number" class="form-control" id="revenue" value="0">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">COGS ($)</label>
+                            <input type="number" class="form-control" id="cogs" value="0">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Operating Expenses ($)</label>
+                            <input type="number" class="form-control" id="opex" value="0">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Payroll ($)</label>
+                            <input type="number" class="form-control" id="payroll" value="0">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Net Income ($)</label>
+                            <input type="number" class="form-control" id="netIncome" value="0">
+                        </div>
+
+                        <div class="col-12"><hr><h6>Balance Sheet</h6></div>
+                        <div class="col-md-4">
+                            <label class="form-label">Cash ($)</label>
+                            <input type="number" class="form-control" id="cash" value="0">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Accounts Receivable ($)</label>
+                            <input type="number" class="form-control" id="ar" value="0">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Inventory ($)</label>
+                            <input type="number" class="form-control" id="inventory" value="0">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Accounts Payable ($)</label>
+                            <input type="number" class="form-control" id="ap" value="0">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Current Liabilities ($)</label>
+                            <input type="number" class="form-control" id="currentLiab" value="0">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Total Equity ($)</label>
+                            <input type="number" class="form-control" id="equity" value="0">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="addPeriod()">Add Period</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const companyId = '{{ company.id }}';
+
+async function addPeriod() {
+    const revenue = parseFloat(document.getElementById('revenue').value) || 0;
+    const cogs = parseFloat(document.getElementById('cogs').value) || 0;
+    const opex = parseFloat(document.getElementById('opex').value) || 0;
+    const cash = parseFloat(document.getElementById('cash').value) || 0;
+    const ar = parseFloat(document.getElementById('ar').value) || 0;
+    const inventory = parseFloat(document.getElementById('inventory').value) || 0;
+    const ap = parseFloat(document.getElementById('ap').value) || 0;
+    const currentLiab = parseFloat(document.getElementById('currentLiab').value) || 0;
+
+    const data = {
+        period_date: document.getElementById('periodDate').value,
+        period_label: document.getElementById('periodLabel').value,
+        revenue: revenue,
+        cogs: cogs,
+        gross_profit: revenue - cogs,
+        operating_expenses: opex,
+        payroll: parseFloat(document.getElementById('payroll').value) || 0,
+        net_income: parseFloat(document.getElementById('netIncome').value) || 0,
+        cash: cash,
+        accounts_receivable: ar,
+        inventory: inventory,
+        total_current_assets: cash + ar + inventory,
+        accounts_payable: ap,
+        total_current_liabilities: currentLiab || ap,
+        total_equity: parseFloat(document.getElementById('equity').value) || 0
+    };
+
+    if (!data.period_date) {
+        alert('Period date is required');
+        return;
+    }
+
+    try {
+        const result = await apiCall(`/api/companies/${companyId}/periods`, 'POST', data);
+        if (result.success) {
+            location.reload();
+        }
+    } catch (error) {
+        alert('Error: ' + error.message);
+    }
+}
+
+async function generateForecast() {
+    try {
+        const result = await apiCall(`/api/companies/${companyId}/forecast`, 'POST', {
+            periods: 6,
+            scenario: 'baseline'
+        });
+
+        if (result.success) {
+            alert(`Forecast generated! Runway: ${result.forecast.runway_months.toFixed(1)} months`);
+            location.reload();
+        }
+    } catch (error) {
+        alert('Error: ' + error.message);
+    }
+}
+</script>
+{% endblock %}
