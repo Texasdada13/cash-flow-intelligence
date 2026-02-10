@@ -1,0 +1,228 @@
+{% extends "base.html" %}
+
+{% block title %}Assessment History - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2><i class="bi bi-clock-history me-2"></i>Assessment History</h2>
+            <p class="text-muted mb-0">View and compare past cash flow health assessments</p>
+        </div>
+        <a href="/assessment" class="btn btn-primary">
+            <i class="bi bi-plus-lg me-1"></i>New Assessment
+        </a>
+    </div>
+
+    {% if assessments %}
+    <!-- Summary Stats -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <h3 class="text-primary mb-0">{{ assessments|length }}</h3>
+                    <small class="text-muted">Total Assessments</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    {% set avg_score = (assessments|map(attribute='overall_score')|list|sum / assessments|length)|round(1) %}
+                    <h3 class="text-success mb-0">{{ avg_score }}</h3>
+                    <small class="text-muted">Average Score</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    {% if assessments|length > 1 %}
+                        {% set trend = assessments[0].overall_score - assessments[1].overall_score %}
+                        <h3 class="{% if trend > 0 %}text-success{% elif trend < 0 %}text-danger{% else %}text-muted{% endif %} mb-0">
+                            {% if trend > 0 %}+{% endif %}{{ trend|round(1) }}
+                        </h3>
+                    {% else %}
+                        <h3 class="text-muted mb-0">--</h3>
+                    {% endif %}
+                    <small class="text-muted">Score Change</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <h3 class="text-info mb-0">{{ assessments[0].overall_grade if assessments else '--' }}</h3>
+                    <small class="text-muted">Latest Grade</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Trend Chart -->
+    {% if assessments|length > 1 %}
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="bi bi-graph-up me-2"></i>Score Trend
+        </div>
+        <div class="card-body">
+            <canvas id="trendChart" height="100"></canvas>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Assessments Table -->
+    <div class="card">
+        <div class="card-header">
+            <i class="bi bi-table me-2"></i>All Assessments
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Company</th>
+                            <th>Industry</th>
+                            <th>Score</th>
+                            <th>Grade</th>
+                            <th>Risk Level</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for assessment in assessments %}
+                        <tr>
+                            <td>{{ assessment.created_at.strftime('%Y-%m-%d %H:%M') if assessment.created_at else 'N/A' }}</td>
+                            <td>{{ assessment.company_name or 'Anonymous' }}</td>
+                            <td>{{ assessment.industry or 'General' }}</td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="progress flex-grow-1 me-2" style="height: 8px; width: 80px;">
+                                        <div class="progress-bar
+                                            {% if assessment.overall_score >= 80 %}bg-success
+                                            {% elif assessment.overall_score >= 60 %}bg-warning
+                                            {% else %}bg-danger{% endif %}"
+                                            style="width: {{ assessment.overall_score }}%"></div>
+                                    </div>
+                                    <span>{{ assessment.overall_score|round(1) }}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge
+                                    {% if assessment.overall_grade == 'A' %}bg-success
+                                    {% elif assessment.overall_grade == 'B' %}bg-primary
+                                    {% elif assessment.overall_grade == 'C' %}bg-warning
+                                    {% elif assessment.overall_grade == 'D' %}bg-orange
+                                    {% else %}bg-danger{% endif %}">
+                                    {{ assessment.overall_grade }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge
+                                    {% if assessment.risk_level == 'low' %}bg-success
+                                    {% elif assessment.risk_level == 'medium' %}bg-warning
+                                    {% elif assessment.risk_level == 'high' %}bg-danger
+                                    {% else %}bg-dark{% endif %}">
+                                    {{ assessment.risk_level|capitalize }}
+                                </span>
+                            </td>
+                            <td>
+                                <a href="/assessment/{{ assessment.id }}/results" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-eye me-1"></i>View
+                                </a>
+                                <button class="btn btn-sm btn-outline-success" onclick="generateRoadmap('{{ assessment.id }}')">
+                                    <i class="bi bi-map me-1"></i>Roadmap
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <!-- Empty State -->
+    <div class="card">
+        <div class="card-body text-center py-5">
+            <i class="bi bi-clipboard-x display-1 text-muted"></i>
+            <h4 class="mt-3">No Assessments Yet</h4>
+            <p class="text-muted">Complete your first cash flow health assessment to see it here.</p>
+            <a href="/assessment" class="btn btn-primary">
+                <i class="bi bi-plus-lg me-1"></i>Start Assessment
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+{% if assessments|length > 1 %}
+// Trend Chart
+const ctx = document.getElementById('trendChart').getContext('2d');
+const assessmentData = {{ assessments|map(attribute='overall_score')|list|reverse|tojson }};
+const assessmentDates = {{ assessments|map(attribute='created_at')|list|reverse|map('strftime', '%m/%d')|list|tojson }};
+
+new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: assessmentDates,
+        datasets: [{
+            label: 'Assessment Score',
+            data: assessmentData,
+            borderColor: '#198754',
+            backgroundColor: 'rgba(25, 135, 84, 0.1)',
+            fill: true,
+            tension: 0.3,
+            pointRadius: 6,
+            pointHoverRadius: 8
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+            legend: {
+                display: false
+            }
+        },
+        scales: {
+            y: {
+                min: 0,
+                max: 100,
+                grid: {
+                    color: 'rgba(255,255,255,0.1)'
+                }
+            },
+            x: {
+                grid: {
+                    display: false
+                }
+            }
+        }
+    }
+});
+{% endif %}
+
+function generateRoadmap(assessmentId) {
+    if (!confirm('Generate an implementation roadmap based on this assessment?')) return;
+
+    fetch('/api/roadmaps/generate', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({assessment_id: assessmentId})
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            window.location.href = '/roadmap/' + data.roadmap.id;
+        } else {
+            alert('Error: ' + (data.error || 'Failed to generate roadmap'));
+        }
+    })
+    .catch(err => alert('Error: ' + err.message));
+}
+</script>
+{% endblock %}

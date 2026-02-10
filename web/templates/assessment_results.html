@@ -1,0 +1,418 @@
+{% extends "base.html" %}
+
+{% block title %}Assessment Results - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-2">
+                    <li class="breadcrumb-item"><a href="/history">History</a></li>
+                    <li class="breadcrumb-item active">Assessment Results</li>
+                </ol>
+            </nav>
+            <h2><i class="bi bi-clipboard-data me-2"></i>Assessment Results</h2>
+            <p class="text-muted mb-0">
+                {{ assessment.company_name or 'Anonymous' }} | {{ assessment.industry or 'General' }} |
+                {{ assessment.created_at.strftime('%B %d, %Y at %H:%M') if assessment.created_at else 'N/A' }}
+            </p>
+        </div>
+        <div class="btn-group">
+            <button class="btn btn-outline-primary" onclick="generateFramework()">
+                <i class="bi bi-file-earmark-text me-1"></i>Generate Framework
+            </button>
+            <button class="btn btn-outline-success" onclick="generateRoadmap()">
+                <i class="bi bi-map me-1"></i>Generate Roadmap
+            </button>
+            <button class="btn btn-primary" onclick="generateDocument()">
+                <i class="bi bi-file-pdf me-1"></i>Generate Report
+            </button>
+        </div>
+    </div>
+
+    <!-- Overall Score Card -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div class="score-circle mx-auto mb-3" style="width: 150px; height: 150px; border-radius: 50%; border: 8px solid
+                        {% if assessment.overall_score >= 80 %}#198754
+                        {% elif assessment.overall_score >= 60 %}#ffc107
+                        {% else %}#dc3545{% endif %};
+                        display: flex; align-items: center; justify-content: center; flex-direction: column;">
+                        <h1 class="mb-0">{{ assessment.overall_score|round(0)|int }}</h1>
+                        <small>/ 100</small>
+                    </div>
+                    <h4 class="mb-1">
+                        <span class="badge fs-5
+                            {% if assessment.overall_grade == 'A' %}bg-success
+                            {% elif assessment.overall_grade == 'B' %}bg-primary
+                            {% elif assessment.overall_grade == 'C' %}bg-warning
+                            {% else %}bg-danger{% endif %}">
+                            Grade {{ assessment.overall_grade }}
+                        </span>
+                    </h4>
+                    <p class="text-muted">Risk Level:
+                        <span class="badge
+                            {% if assessment.risk_level == 'low' %}bg-success
+                            {% elif assessment.risk_level == 'medium' %}bg-warning
+                            {% elif assessment.risk_level == 'high' %}bg-danger
+                            {% else %}bg-dark{% endif %}">
+                            {{ assessment.risk_level|capitalize }}
+                        </span>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="card h-100">
+                <div class="card-header">
+                    <i class="bi bi-bar-chart me-2"></i>Dimension Scores
+                </div>
+                <div class="card-body">
+                    <canvas id="dimensionChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dimension Details -->
+    <div class="row mb-4">
+        {% for dim_id, dim in (assessment.dimension_scores or {}).items() %}
+        <div class="col-md-4 mb-3">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>{{ dim.name }}</span>
+                    <span class="badge
+                        {% if dim.grade == 'A' %}bg-success
+                        {% elif dim.grade == 'B' %}bg-primary
+                        {% elif dim.grade == 'C' %}bg-warning
+                        {% else %}bg-danger{% endif %}">
+                        {{ dim.grade }}
+                    </span>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Score</span>
+                        <strong>{{ dim.score|round(1) }}/100</strong>
+                    </div>
+                    <div class="progress" style="height: 10px;">
+                        <div class="progress-bar
+                            {% if dim.score >= 80 %}bg-success
+                            {% elif dim.score >= 60 %}bg-warning
+                            {% else %}bg-danger{% endif %}"
+                            style="width: {{ dim.score }}%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Strengths & Gaps -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header bg-success bg-opacity-10">
+                    <i class="bi bi-check-circle text-success me-2"></i>Strengths
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled mb-0">
+                        {% for strength in (assessment.strengths or []) %}
+                        <li class="mb-2">
+                            <i class="bi bi-check-lg text-success me-2"></i>{{ strength }}
+                        </li>
+                        {% else %}
+                        <li class="text-muted">No specific strengths identified</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header bg-danger bg-opacity-10">
+                    <i class="bi bi-exclamation-circle text-danger me-2"></i>Gaps to Address
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled mb-0">
+                        {% for gap in (assessment.gaps or []) %}
+                        <li class="mb-2">
+                            <i class="bi bi-arrow-right text-danger me-2"></i>{{ gap }}
+                        </li>
+                        {% else %}
+                        <li class="text-muted">No significant gaps identified</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recommendations -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="bi bi-lightbulb me-2"></i>Recommendations
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Priority</th>
+                            <th>Recommendation</th>
+                            <th>Timeframe</th>
+                            <th>Effort</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for rec in (assessment.recommendations or []) %}
+                        <tr>
+                            <td>
+                                <span class="badge
+                                    {% if rec.priority == 'high' or rec.get('priority') == 'high' %}bg-danger
+                                    {% elif rec.priority == 'medium' or rec.get('priority') == 'medium' %}bg-warning
+                                    {% else %}bg-info{% endif %}">
+                                    {{ (rec.priority or rec.get('priority', 'medium'))|capitalize }}
+                                </span>
+                            </td>
+                            <td>{{ rec.recommendation or rec.get('recommendation', rec) }}</td>
+                            <td>{{ rec.timeframe or rec.get('timeframe', 'TBD') }}</td>
+                            <td>{{ rec.effort or rec.get('effort', 'TBD') }}</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="4" class="text-muted text-center">No recommendations generated</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="d-flex justify-content-between">
+        <a href="/history" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Back to History
+        </a>
+        <div>
+            <a href="/assessment" class="btn btn-primary">
+                <i class="bi bi-plus-lg me-1"></i>New Assessment
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Framework Selection Modal -->
+<div class="modal fade" id="frameworkModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content" style="background: var(--card-bg);">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-file-earmark-text me-2"></i>Generate Framework</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Select a framework type to generate:</p>
+                <div class="list-group">
+                    <button class="list-group-item list-group-item-action" onclick="doGenerateFramework('cash_management')">
+                        <strong>Cash Management Policy</strong>
+                        <p class="mb-0 small text-muted">Comprehensive policy for managing cash flows, reserves, and liquidity</p>
+                    </button>
+                    <button class="list-group-item list-group-item-action" onclick="doGenerateFramework('credit_collections')">
+                        <strong>Credit & Collections Policy</strong>
+                        <p class="mb-0 small text-muted">Guidelines for extending credit and collecting receivables</p>
+                    </button>
+                    <button class="list-group-item list-group-item-action" onclick="doGenerateFramework('working_capital')">
+                        <strong>Working Capital Strategy</strong>
+                        <p class="mb-0 small text-muted">Strategic approach to optimizing working capital components</p>
+                    </button>
+                    <button class="list-group-item list-group-item-action" onclick="doGenerateFramework('kpi_dashboard')">
+                        <strong>Cash Flow KPI Dashboard</strong>
+                        <p class="mb-0 small text-muted">Key performance indicators for monitoring cash flow health</p>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Document Selection Modal -->
+<div class="modal fade" id="documentModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content" style="background: var(--card-bg);">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-file-pdf me-2"></i>Generate Report</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Select a report type to generate:</p>
+                <div class="list-group">
+                    <button class="list-group-item list-group-item-action" onclick="doGenerateDocument('executive_summary')">
+                        <strong>Executive Summary</strong>
+                        <p class="mb-0 small text-muted">High-level overview for C-suite executives</p>
+                    </button>
+                    <button class="list-group-item list-group-item-action" onclick="doGenerateDocument('board_presentation')">
+                        <strong>Board Presentation</strong>
+                        <p class="mb-0 small text-muted">Detailed presentation for board meetings</p>
+                    </button>
+                    <button class="list-group-item list-group-item-action" onclick="doGenerateDocument('detailed_analysis')">
+                        <strong>Detailed Analysis Report</strong>
+                        <p class="mb-0 small text-muted">Comprehensive analysis with recommendations</p>
+                    </button>
+                    <button class="list-group-item list-group-item-action" onclick="doGenerateDocument('team_report')">
+                        <strong>Team Report</strong>
+                        <p class="mb-0 small text-muted">Operational report for finance team</p>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const assessmentId = '{{ assessment.id }}';
+
+// Dimension Chart
+const ctx = document.getElementById('dimensionChart').getContext('2d');
+const dimensions = {{ assessment.dimension_scores|tojson }};
+const dimLabels = Object.values(dimensions).map(d => d.name);
+const dimScores = Object.values(dimensions).map(d => d.score);
+
+new Chart(ctx, {
+    type: 'radar',
+    data: {
+        labels: dimLabels,
+        datasets: [{
+            label: 'Score',
+            data: dimScores,
+            backgroundColor: 'rgba(25, 135, 84, 0.2)',
+            borderColor: '#198754',
+            borderWidth: 2,
+            pointBackgroundColor: '#198754'
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        scales: {
+            r: {
+                min: 0,
+                max: 100,
+                ticks: {
+                    stepSize: 20
+                }
+            }
+        },
+        plugins: {
+            legend: {
+                display: false
+            }
+        }
+    }
+});
+
+function generateFramework() {
+    new bootstrap.Modal(document.getElementById('frameworkModal')).show();
+}
+
+function doGenerateFramework(type) {
+    bootstrap.Modal.getInstance(document.getElementById('frameworkModal')).hide();
+    showLoading('Generating framework...');
+
+    fetch('/api/frameworks/generate', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            framework_type: type,
+            assessment_id: assessmentId
+        })
+    })
+    .then(r => r.json())
+    .then(data => {
+        hideLoading();
+        if (data.success) {
+            alert('Framework generated successfully!');
+            window.location.href = '/frameworks';
+        } else {
+            alert('Error: ' + (data.error || 'Failed to generate framework'));
+        }
+    })
+    .catch(err => {
+        hideLoading();
+        alert('Error: ' + err.message);
+    });
+}
+
+function generateRoadmap() {
+    if (!confirm('Generate an implementation roadmap based on this assessment?')) return;
+    showLoading('Generating roadmap...');
+
+    fetch('/api/roadmaps/generate', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({assessment_id: assessmentId})
+    })
+    .then(r => r.json())
+    .then(data => {
+        hideLoading();
+        if (data.success) {
+            window.location.href = '/roadmap/' + data.roadmap.id;
+        } else {
+            alert('Error: ' + (data.error || 'Failed to generate roadmap'));
+        }
+    })
+    .catch(err => {
+        hideLoading();
+        alert('Error: ' + err.message);
+    });
+}
+
+function generateDocument() {
+    new bootstrap.Modal(document.getElementById('documentModal')).show();
+}
+
+function doGenerateDocument(type) {
+    bootstrap.Modal.getInstance(document.getElementById('documentModal')).hide();
+    showLoading('Generating report...');
+
+    fetch('/api/documents/generate', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            doc_type: type,
+            assessment_id: assessmentId
+        })
+    })
+    .then(r => r.json())
+    .then(data => {
+        hideLoading();
+        if (data.success) {
+            alert('Report generated successfully!');
+            window.location.href = '/reports';
+        } else {
+            alert('Error: ' + (data.error || 'Failed to generate report'));
+        }
+    })
+    .catch(err => {
+        hideLoading();
+        alert('Error: ' + err.message);
+    });
+}
+
+function showLoading(message) {
+    const overlay = document.createElement('div');
+    overlay.id = 'loadingOverlay';
+    overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:9999;';
+    overlay.innerHTML = `<div class="text-center text-white"><div class="spinner-border mb-3"></div><p>${message}</p></div>`;
+    document.body.appendChild(overlay);
+}
+
+function hideLoading() {
+    const overlay = document.getElementById('loadingOverlay');
+    if (overlay) overlay.remove();
+}
+</script>
+{% endblock %}

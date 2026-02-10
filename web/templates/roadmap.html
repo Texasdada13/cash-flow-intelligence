@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+
+{% block title %}Implementation Roadmap - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-2">
+                    <li class="breadcrumb-item"><a href="/history">History</a></li>
+                    <li class="breadcrumb-item active">Roadmap</li>
+                </ol>
+            </nav>
+            <h2><i class="bi bi-map me-2"></i>{{ roadmap.title }}</h2>
+            <p class="text-muted mb-0">{{ roadmap.description }}</p>
+        </div>
+        <div>
+            <span class="badge bg-primary fs-6">{{ roadmap.total_phases }} Phases</span>
+            <span class="badge bg-success fs-6 ms-2">{{ roadmap.estimated_duration_months }} Months</span>
+        </div>
+    </div>
+
+    <!-- Quick Wins -->
+    {% if roadmap.quick_wins %}
+    <div class="card mb-4 border-success">
+        <div class="card-header bg-success bg-opacity-10">
+            <i class="bi bi-lightning-charge text-success me-2"></i>Quick Wins (First 30 Days)
+        </div>
+        <div class="card-body">
+            <div class="row">
+                {% for win in roadmap.quick_wins %}
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h6 class="card-title"><i class="bi bi-check-circle text-success me-2"></i>{{ win.title }}</h6>
+                            <p class="card-text small">{{ win.description }}</p>
+                            {% if win.expected_impact %}
+                            <span class="badge bg-success">{{ win.expected_impact }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Phases Timeline -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="bi bi-diagram-3 me-2"></i>Implementation Phases
+        </div>
+        <div class="card-body">
+            <div class="timeline">
+                {% for phase in (roadmap.phases or []) %}
+                <div class="timeline-item mb-4">
+                    <div class="d-flex align-items-start">
+                        <div class="timeline-marker me-3">
+                            <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                {{ loop.index }}
+                            </div>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h5 class="mb-0">{{ phase.name }}</h5>
+                                <span class="badge bg-secondary">{{ phase.duration_weeks }} weeks</span>
+                            </div>
+                            <p class="text-muted mb-3">{{ phase.focus }}</p>
+
+                            <!-- Actions Table -->
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Action</th>
+                                            <th>Description</th>
+                                            <th>Effort</th>
+                                            <th>Impact</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for action in (phase.actions or []) %}
+                                        <tr>
+                                            <td><strong>{{ action.title }}</strong></td>
+                                            <td>{{ action.description }}</td>
+                                            <td>{{ action.effort_days }} days</td>
+                                            <td>
+                                                <span class="badge
+                                                    {% if action.impact == 'high' %}bg-success
+                                                    {% elif action.impact == 'medium' %}bg-warning
+                                                    {% else %}bg-info{% endif %}">
+                                                    {{ action.impact|capitalize }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <p class="text-muted">No phases defined in this roadmap.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Metrics -->
+    {% if roadmap.success_metrics %}
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="bi bi-graph-up-arrow me-2"></i>Success Metrics
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Metric</th>
+                            <th>Current</th>
+                            <th>Target</th>
+                            <th>Timeframe</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for metric in roadmap.success_metrics %}
+                        <tr>
+                            <td>{{ metric.metric }}</td>
+                            <td>{{ metric.current }}</td>
+                            <td class="text-success"><strong>{{ metric.target }}</strong></td>
+                            <td>{{ metric.timeframe }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Actions -->
+    <div class="d-flex justify-content-between">
+        <a href="/history" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Back to History
+        </a>
+        <button class="btn btn-primary" onclick="window.print()">
+            <i class="bi bi-printer me-1"></i>Print Roadmap
+        </button>
+    </div>
+</div>
+
+<style>
+.timeline-item:not(:last-child) {
+    border-left: 2px solid var(--card-border);
+    margin-left: 19px;
+    padding-left: 30px;
+}
+.timeline-marker {
+    margin-left: -19px;
+}
+@media print {
+    .navbar, footer, .btn { display: none !important; }
+    .card { break-inside: avoid; }
+}
+</style>
+{% endblock %}

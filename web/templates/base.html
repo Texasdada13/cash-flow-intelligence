@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-bs-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,68 +10,134 @@
     <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
     <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
     <style>
         :root {
-            --primary-gradient: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 100%);
-            --accent-color: #4dabf7;
-            --success-color: #51cf66;
-            --warning-color: #fcc419;
-            --danger-color: #ff6b6b;
+            /* Cash Flow Intelligence - Green/Teal Theme */
+            --cfi-primary: #198754;
+            --cfi-primary-light: #20c997;
+            --cfi-primary-dark: #146c43;
+            --cfi-gradient: linear-gradient(135deg, #146c43 0%, #198754 50%, #20c997 100%);
+            --cfi-accent: #0dcaf0;
+            --cfi-success: #198754;
+            --cfi-warning: #ffc107;
+            --cfi-danger: #dc3545;
+        }
+
+        /* Dark Theme */
+        [data-bs-theme="dark"] {
+            --bs-body-bg: #0d1117;
+            --bs-body-color: #e6edf3;
+            --card-bg: #161b22;
+            --card-border: #30363d;
+            --input-bg: #0d1117;
+            --input-border: #30363d;
+            --hover-bg: #1f2428;
+            --muted-color: #8b949e;
+        }
+
+        /* Light Theme */
+        [data-bs-theme="light"] {
+            --bs-body-bg: #f6f8fa;
+            --bs-body-color: #1f2328;
+            --card-bg: #ffffff;
+            --card-border: #d1d9e0;
+            --input-bg: #ffffff;
+            --input-border: #d1d9e0;
+            --hover-bg: #f3f4f6;
+            --muted-color: #656d76;
         }
 
         body {
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            background: var(--bs-body-bg);
             min-height: 100vh;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
+        /* Navbar */
         .navbar {
-            background: var(--primary-gradient) !important;
+            background: var(--cfi-gradient) !important;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
         }
 
         .navbar-brand {
             font-weight: 700;
             letter-spacing: -0.5px;
+            color: white !important;
         }
 
+        .nav-link {
+            color: rgba(255, 255, 255, 0.9) !important;
+            transition: all 0.2s ease;
+        }
+
+        .nav-link:hover {
+            color: white !important;
+            transform: translateY(-1px);
+        }
+
+        /* Cards */
         .card {
-            border: none;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
             border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 16px rgba(25, 135, 84, 0.15);
         }
 
         .card-header {
-            background: white;
-            border-bottom: 1px solid #f1f3f4;
+            background: transparent;
+            border-bottom: 1px solid var(--card-border);
             font-weight: 600;
         }
 
+        /* Buttons */
         .btn-primary {
-            background: var(--primary-gradient);
+            background: var(--cfi-gradient);
             border: none;
+            transition: all 0.3s ease;
         }
 
         .btn-primary:hover {
-            background: linear-gradient(135deg, #2d5a87 0%, #3d7ab7 100%);
+            background: linear-gradient(135deg, #198754 0%, #20c997 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(25, 135, 84, 0.4);
         }
 
+        .btn-outline-primary {
+            color: var(--cfi-primary);
+            border-color: var(--cfi-primary);
+        }
+
+        .btn-outline-primary:hover {
+            background: var(--cfi-primary);
+            border-color: var(--cfi-primary);
+        }
+
+        /* Health Scores */
         .health-score {
             font-size: 3rem;
             font-weight: 700;
         }
 
-        .score-excellent { color: var(--success-color); }
-        .score-good { color: #69db7c; }
-        .score-fair { color: var(--warning-color); }
-        .score-poor { color: #ff922b; }
-        .score-critical { color: var(--danger-color); }
+        .score-excellent { color: #198754; }
+        .score-good { color: #20c997; }
+        .score-fair { color: #ffc107; }
+        .score-poor { color: #fd7e14; }
+        .score-critical { color: #dc3545; }
 
-        .risk-low { background-color: #d3f9d8; color: #2b8a3e; }
-        .risk-medium { background-color: #fff3bf; color: #e67700; }
-        .risk-high { background-color: #ffe8cc; color: #d9480f; }
-        .risk-critical { background-color: #ffc9c9; color: #c92a2a; }
+        /* Risk Badges */
+        .risk-low { background-color: rgba(25, 135, 84, 0.2); color: #198754; }
+        .risk-medium { background-color: rgba(255, 193, 7, 0.2); color: #ffc107; }
+        .risk-high { background-color: rgba(253, 126, 20, 0.2); color: #fd7e14; }
+        .risk-critical { background-color: rgba(220, 53, 69, 0.2); color: #dc3545; }
 
+        /* Chat Styles */
         .chat-container {
             height: calc(100vh - 200px);
             display: flex;
@@ -92,26 +158,29 @@
         }
 
         .chat-message.user {
-            background: var(--primary-gradient);
+            background: var(--cfi-gradient);
             color: white;
             margin-left: auto;
         }
 
         .chat-message.assistant {
-            background: white;
-            border: 1px solid #e9ecef;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
         }
 
         .suggested-prompt {
             cursor: pointer;
             transition: all 0.2s;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
         }
 
         .suggested-prompt:hover {
-            background-color: #e7f5ff;
-            border-color: var(--accent-color);
+            background: rgba(25, 135, 84, 0.1);
+            border-color: var(--cfi-primary);
         }
 
+        /* Metric Cards */
         .metric-card {
             text-align: center;
             padding: 1.5rem;
@@ -120,16 +189,211 @@
         .metric-value {
             font-size: 2rem;
             font-weight: 700;
+            color: var(--cfi-primary);
         }
 
         .metric-label {
-            color: #868e96;
+            color: var(--muted-color);
             font-size: 0.875rem;
         }
 
-        .trend-up { color: var(--success-color); }
-        .trend-down { color: var(--danger-color); }
-        .trend-flat { color: #868e96; }
+        /* Trends */
+        .trend-up { color: var(--cfi-success); }
+        .trend-down { color: var(--cfi-danger); }
+        .trend-flat { color: var(--muted-color); }
+
+        /* Feature Cards */
+        .feature-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(25, 135, 84, 0.2);
+        }
+
+        .feature-card .feature-icon {
+            font-size: 2.5rem;
+            color: var(--cfi-primary);
+            margin-bottom: 1rem;
+        }
+
+        /* Command Palette */
+        .command-palette-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            z-index: 9999;
+            display: none;
+            justify-content: center;
+            padding-top: 15vh;
+        }
+
+        .command-palette-overlay.active {
+            display: flex;
+        }
+
+        .command-palette {
+            width: 100%;
+            max-width: 600px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
+            max-height: 70vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .command-palette-input {
+            padding: 1rem;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .command-palette-input input {
+            width: 100%;
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            color: var(--bs-body-color);
+            font-size: 1rem;
+        }
+
+        .command-palette-input input:focus {
+            outline: none;
+            border-color: var(--cfi-primary);
+            box-shadow: 0 0 0 3px rgba(25, 135, 84, 0.2);
+        }
+
+        .command-palette-results {
+            overflow-y: auto;
+            padding: 0.5rem;
+        }
+
+        .command-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.15s ease;
+        }
+
+        .command-item:hover,
+        .command-item.selected {
+            background: rgba(25, 135, 84, 0.15);
+        }
+
+        .command-item i {
+            width: 24px;
+            margin-right: 12px;
+            color: var(--cfi-primary);
+        }
+
+        .command-item .command-title {
+            flex: 1;
+        }
+
+        .command-item .command-shortcut {
+            font-size: 0.75rem;
+            color: var(--muted-color);
+            background: var(--hover-bg);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+        }
+
+        /* Settings Modal */
+        .settings-section {
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .settings-section:last-child {
+            border-bottom: none;
+        }
+
+        .settings-section h6 {
+            color: var(--cfi-primary);
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+        }
+
+        .setting-label {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .setting-label small {
+            color: var(--muted-color);
+        }
+
+        /* Form Controls */
+        .form-control, .form-select {
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            color: var(--bs-body-color);
+        }
+
+        .form-control:focus, .form-select:focus {
+            background: var(--input-bg);
+            border-color: var(--cfi-primary);
+            box-shadow: 0 0 0 3px rgba(25, 135, 84, 0.2);
+            color: var(--bs-body-color);
+        }
+
+        /* Keyboard hint */
+        .keyboard-hint {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            font-size: 0.8rem;
+            color: var(--muted-color);
+            z-index: 100;
+        }
+
+        .keyboard-hint kbd {
+            background: var(--hover-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 4px;
+            padding: 0.15rem 0.4rem;
+            font-size: 0.75rem;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--card-bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--card-border);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--cfi-primary);
+        }
 
         {% block extra_css %}{% endblock %}
     </style>
@@ -139,7 +403,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container">
             <a class="navbar-brand" href="/">
-                <i class="bi bi-graph-up-arrow me-2"></i>{{ app_name }}
+                <i class="bi bi-cash-stack me-2"></i>{{ app_name }}
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -153,13 +417,39 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/chat">
-                            <i class="bi bi-chat-dots me-1"></i>AI Consultant
+                            <i class="bi bi-chat-dots me-1"></i>AI CFO
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/assessment">
+                            <i class="bi bi-clipboard-check me-1"></i>Assessment
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/history">
+                            <i class="bi bi-clock-history me-1"></i>History
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/frameworks">
+                            <i class="bi bi-file-earmark-text me-1"></i>Frameworks
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/reports">
+                            <i class="bi bi-file-pdf me-1"></i>Reports
                         </a>
                     </li>
                 </ul>
-                <span class="navbar-text">
-                    <small>Powered by Claude AI</small>
-                </span>
+                <div class="d-flex align-items-center gap-2">
+                    <button class="btn btn-sm btn-outline-light" onclick="openCommandPalette()" title="Command Palette (Ctrl+K)">
+                        <i class="bi bi-search me-1"></i>
+                        <small>Ctrl+K</small>
+                    </button>
+                    <button class="btn btn-sm btn-outline-light" onclick="openSettings()" title="Settings (Ctrl+,)">
+                        <i class="bi bi-gear"></i>
+                    </button>
+                </div>
             </div>
         </div>
     </nav>
@@ -170,16 +460,313 @@
     </main>
 
     <!-- Footer -->
-    <footer class="py-4 mt-5 text-center text-muted">
-        <small>&copy; {{ now().year if now is defined else 2024 }} Patriot Tech Systems Consulting LLC</small>
+    <footer class="py-4 mt-5 text-center" style="color: var(--muted-color);">
+        <small>&copy; 2025 Patriot Tech Systems Consulting LLC | Powered by Claude AI</small>
     </footer>
+
+    <!-- Command Palette Overlay -->
+    <div class="command-palette-overlay" id="commandPalette">
+        <div class="command-palette">
+            <div class="command-palette-input">
+                <input type="text" id="commandInput" placeholder="Type a command or search..." autocomplete="off">
+            </div>
+            <div class="command-palette-results" id="commandResults">
+                <!-- Commands populated by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal fade" id="settingsModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content" style="background: var(--card-bg); border: 1px solid var(--card-border);">
+                <div class="modal-header" style="border-bottom-color: var(--card-border);">
+                    <h5 class="modal-title"><i class="bi bi-gear me-2"></i>Settings</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="settings-section">
+                        <h6><i class="bi bi-palette me-2"></i>Appearance</h6>
+                        <div class="setting-item">
+                            <div class="setting-label">
+                                <span>Dark Theme</span>
+                                <small>Use dark color scheme</small>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="settingDarkTheme" checked>
+                            </div>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-label">
+                                <span>Compact View</span>
+                                <small>Reduce spacing and padding</small>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="settingCompactView">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="settings-section">
+                        <h6><i class="bi bi-bell me-2"></i>Notifications</h6>
+                        <div class="setting-item">
+                            <div class="setting-label">
+                                <span>Show Alerts</span>
+                                <small>Display cash flow alerts</small>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="settingShowAlerts" checked>
+                            </div>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-label">
+                                <span>Auto Refresh</span>
+                                <small>Refresh data automatically</small>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="settingAutoRefresh">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="settings-section">
+                        <h6><i class="bi bi-sliders me-2"></i>Preferences</h6>
+                        <div class="setting-item">
+                            <div class="setting-label">
+                                <span>Default View</span>
+                                <small>Starting page when opening app</small>
+                            </div>
+                            <select class="form-select form-select-sm" style="width: auto;" id="settingDefaultView">
+                                <option value="dashboard">Dashboard</option>
+                                <option value="chat">AI CFO</option>
+                                <option value="assessment">Assessment</option>
+                            </select>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-label">
+                                <span>Chart Animations</span>
+                                <small>Animate chart transitions</small>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="settingChartAnimation" checked>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top-color: var(--card-border);">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="saveSettings()">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Keyboard Hint -->
+    <div class="keyboard-hint" id="keyboardHint">
+        <kbd>Ctrl</kbd> + <kbd>K</kbd> Command Palette
+    </div>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
     <!-- Common JS -->
     <script>
-        // API helper
+        // ==================== Settings Management ====================
+        const SETTINGS_KEY = 'cash-flow-intelligence-settings';
+
+        const defaultSettings = {
+            darkTheme: true,
+            compactView: false,
+            showAlerts: true,
+            autoRefresh: false,
+            defaultView: 'dashboard',
+            chartAnimation: true
+        };
+
+        function loadSettings() {
+            const saved = localStorage.getItem(SETTINGS_KEY);
+            return saved ? { ...defaultSettings, ...JSON.parse(saved) } : defaultSettings;
+        }
+
+        function saveSettings() {
+            const settings = {
+                darkTheme: document.getElementById('settingDarkTheme').checked,
+                compactView: document.getElementById('settingCompactView').checked,
+                showAlerts: document.getElementById('settingShowAlerts').checked,
+                autoRefresh: document.getElementById('settingAutoRefresh').checked,
+                defaultView: document.getElementById('settingDefaultView').value,
+                chartAnimation: document.getElementById('settingChartAnimation').checked
+            };
+            localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+            applySettings(settings);
+            bootstrap.Modal.getInstance(document.getElementById('settingsModal')).hide();
+        }
+
+        function applySettings(settings) {
+            document.documentElement.setAttribute('data-bs-theme', settings.darkTheme ? 'dark' : 'light');
+            document.body.classList.toggle('compact-view', settings.compactView);
+        }
+
+        function openSettings() {
+            const settings = loadSettings();
+            document.getElementById('settingDarkTheme').checked = settings.darkTheme;
+            document.getElementById('settingCompactView').checked = settings.compactView;
+            document.getElementById('settingShowAlerts').checked = settings.showAlerts;
+            document.getElementById('settingAutoRefresh').checked = settings.autoRefresh;
+            document.getElementById('settingDefaultView').value = settings.defaultView;
+            document.getElementById('settingChartAnimation').checked = settings.chartAnimation;
+            new bootstrap.Modal(document.getElementById('settingsModal')).show();
+        }
+
+        // Apply settings on load
+        document.addEventListener('DOMContentLoaded', () => {
+            applySettings(loadSettings());
+        });
+
+        // ==================== Command Palette ====================
+        const commands = [
+            { id: 'dashboard', title: 'Go to Dashboard', icon: 'bi-speedometer2', action: () => window.location.href = '/dashboard', category: 'Navigation' },
+            { id: 'chat', title: 'Open AI CFO Chat', icon: 'bi-chat-dots', action: () => window.location.href = '/chat', category: 'Navigation' },
+            { id: 'assessment', title: 'Start Assessment', icon: 'bi-clipboard-check', action: () => window.location.href = '/assessment', category: 'Navigation' },
+            { id: 'add-company', title: 'Add New Company', icon: 'bi-building-add', action: () => window.location.href = '/dashboard', category: 'Actions' },
+            { id: 'theme-toggle', title: 'Toggle Dark/Light Mode', icon: 'bi-moon-stars', action: toggleTheme, category: 'Settings', shortcut: 'Ctrl+Shift+T' },
+            { id: 'settings', title: 'Open Settings', icon: 'bi-gear', action: openSettings, category: 'Settings', shortcut: 'Ctrl+,' },
+            { id: 'help', title: 'Help & Documentation', icon: 'bi-question-circle', action: () => alert('Help documentation coming soon!'), category: 'Help' },
+        ];
+
+        let selectedCommandIndex = 0;
+        let filteredCommands = [...commands];
+
+        function openCommandPalette() {
+            const palette = document.getElementById('commandPalette');
+            const input = document.getElementById('commandInput');
+            palette.classList.add('active');
+            input.value = '';
+            input.focus();
+            renderCommands(commands);
+            selectedCommandIndex = 0;
+            updateSelectedCommand();
+        }
+
+        function closeCommandPalette() {
+            document.getElementById('commandPalette').classList.remove('active');
+        }
+
+        function renderCommands(cmds) {
+            const container = document.getElementById('commandResults');
+            filteredCommands = cmds;
+
+            if (cmds.length === 0) {
+                container.innerHTML = '<div class="p-3 text-center text-muted">No commands found</div>';
+                return;
+            }
+
+            let html = '';
+            let currentCategory = '';
+
+            cmds.forEach((cmd, index) => {
+                if (cmd.category !== currentCategory) {
+                    currentCategory = cmd.category;
+                    html += `<div class="px-3 py-2 text-muted small">${currentCategory}</div>`;
+                }
+                html += `
+                    <div class="command-item ${index === selectedCommandIndex ? 'selected' : ''}"
+                         data-index="${index}" onclick="executeCommand(${index})">
+                        <i class="bi ${cmd.icon}"></i>
+                        <span class="command-title">${cmd.title}</span>
+                        ${cmd.shortcut ? `<span class="command-shortcut">${cmd.shortcut}</span>` : ''}
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function updateSelectedCommand() {
+            document.querySelectorAll('.command-item').forEach((item, index) => {
+                item.classList.toggle('selected', index === selectedCommandIndex);
+            });
+
+            const selected = document.querySelector('.command-item.selected');
+            if (selected) selected.scrollIntoView({ block: 'nearest' });
+        }
+
+        function executeCommand(index) {
+            const cmd = filteredCommands[index];
+            if (cmd && cmd.action) {
+                closeCommandPalette();
+                cmd.action();
+            }
+        }
+
+        function toggleTheme() {
+            const settings = loadSettings();
+            settings.darkTheme = !settings.darkTheme;
+            localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+            applySettings(settings);
+        }
+
+        // Command palette event listeners
+        document.getElementById('commandInput').addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            const filtered = commands.filter(cmd =>
+                cmd.title.toLowerCase().includes(query) ||
+                cmd.category.toLowerCase().includes(query)
+            );
+            selectedCommandIndex = 0;
+            renderCommands(filtered);
+            updateSelectedCommand();
+        });
+
+        document.getElementById('commandInput').addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                selectedCommandIndex = Math.min(selectedCommandIndex + 1, filteredCommands.length - 1);
+                updateSelectedCommand();
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                selectedCommandIndex = Math.max(selectedCommandIndex - 1, 0);
+                updateSelectedCommand();
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                executeCommand(selectedCommandIndex);
+            } else if (e.key === 'Escape') {
+                closeCommandPalette();
+            }
+        });
+
+        document.getElementById('commandPalette').addEventListener('click', (e) => {
+            if (e.target.id === 'commandPalette') closeCommandPalette();
+        });
+
+        // ==================== Keyboard Shortcuts ====================
+        document.addEventListener('keydown', (e) => {
+            // Ctrl+K - Command Palette
+            if (e.ctrlKey && e.key === 'k') {
+                e.preventDefault();
+                openCommandPalette();
+            }
+            // Ctrl+, - Settings
+            if (e.ctrlKey && e.key === ',') {
+                e.preventDefault();
+                openSettings();
+            }
+            // Ctrl+Shift+T - Toggle Theme
+            if (e.ctrlKey && e.shiftKey && e.key === 'T') {
+                e.preventDefault();
+                toggleTheme();
+            }
+            // Escape - Close palette
+            if (e.key === 'Escape') {
+                closeCommandPalette();
+            }
+        });
+
+        // Hide keyboard hint after 10 seconds
+        setTimeout(() => {
+            const hint = document.getElementById('keyboardHint');
+            if (hint) hint.style.display = 'none';
+        }, 10000);
+
+        // ==================== API Helper ====================
         async function apiCall(url, method = 'GET', data = null) {
             const options = {
                 method,
@@ -200,7 +787,7 @@
             return result;
         }
 
-        // Format currency
+        // ==================== Utility Functions ====================
         function formatCurrency(value) {
             return new Intl.NumberFormat('en-US', {
                 style: 'currency',
@@ -210,18 +797,26 @@
             }).format(value);
         }
 
-        // Format percentage
         function formatPercent(value) {
             return (value || 0).toFixed(1) + '%';
         }
 
-        // Get score class
         function getScoreClass(score) {
             if (score >= 80) return 'score-excellent';
             if (score >= 70) return 'score-good';
             if (score >= 60) return 'score-fair';
             if (score >= 40) return 'score-poor';
             return 'score-critical';
+        }
+
+        function getRiskClass(level) {
+            const classes = {
+                'Low': 'risk-low',
+                'Medium': 'risk-medium',
+                'High': 'risk-high',
+                'Critical': 'risk-critical'
+            };
+            return classes[level] || 'risk-medium';
         }
     </script>
 

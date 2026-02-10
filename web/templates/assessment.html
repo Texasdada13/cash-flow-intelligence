@@ -1,0 +1,504 @@
+{% extends "base.html" %}
+
+{% block title %}Cash Flow Assessment - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-lg-8">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/">Home</a></li>
+                    <li class="breadcrumb-item active">Assessment</li>
+                </ol>
+            </nav>
+            <h1 class="mb-2">
+                <i class="bi bi-clipboard-check text-primary me-2"></i>
+                Cash Flow Health Assessment
+            </h1>
+            <p class="lead text-muted">
+                Evaluate your cash management practices across 5 key dimensions.
+                Takes about 10-15 minutes to complete.
+            </p>
+        </div>
+    </div>
+
+    <!-- Assessment Container -->
+    <div id="assessment-app">
+        <!-- Progress Bar -->
+        <div class="card mb-4 border-0 shadow-sm">
+            <div class="card-body py-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="fw-semibold" id="progress-text">Getting started...</span>
+                    <span class="text-muted small" id="progress-count">0 / 40 questions</span>
+                </div>
+                <div class="progress" style="height: 8px;">
+                    <div class="progress-bar bg-primary" id="progress-bar" role="progressbar" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dimension Tabs -->
+        <ul class="nav nav-pills nav-fill mb-4" id="dimensionTabs" role="tablist">
+            {% for dim_id, dim in dimensions.items() %}
+            <li class="nav-item" role="presentation">
+                <button class="nav-link {% if loop.first %}active{% endif %} py-3"
+                        id="tab-{{ dim_id }}"
+                        data-bs-toggle="pill"
+                        data-bs-target="#panel-{{ dim_id }}"
+                        type="button"
+                        role="tab"
+                        aria-controls="panel-{{ dim_id }}"
+                        aria-selected="{{ 'true' if loop.first else 'false' }}">
+                    <i class="bi {{ dim.icon }} me-2"></i>
+                    <span class="d-none d-md-inline">{{ dim.name }}</span>
+                    <span class="d-md-none">{{ loop.index }}</span>
+                    <span class="badge bg-secondary ms-2 dim-progress" id="badge-{{ dim_id }}">0/{{ questions_by_dimension[dim_id]|length }}</span>
+                </button>
+            </li>
+            {% endfor %}
+        </ul>
+
+        <!-- Question Panels -->
+        <div class="tab-content" id="dimensionContent">
+            {% for dim_id, dim in dimensions.items() %}
+            <div class="tab-pane fade {% if loop.first %}show active{% endif %}"
+                 id="panel-{{ dim_id }}"
+                 role="tabpanel"
+                 aria-labelledby="tab-{{ dim_id }}">
+
+                <!-- Dimension Header -->
+                <div class="card border-0 shadow-sm mb-4" style="border-left: 4px solid {{ dim.color }} !important;">
+                    <div class="card-body">
+                        <h4 class="mb-1">
+                            <i class="bi {{ dim.icon }} me-2" style="color: {{ dim.color }}"></i>
+                            {{ dim.name }}
+                        </h4>
+                        <p class="text-muted mb-0">{{ dim.description }}</p>
+                    </div>
+                </div>
+
+                <!-- Questions -->
+                {% for question in questions_by_dimension[dim_id] %}
+                <div class="card border-0 shadow-sm mb-3 question-card" id="card-{{ question.id }}">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <h5 class="mb-1">{{ question.question }}</h5>
+                                {% if question.help_text %}
+                                <small class="text-muted">{{ question.help_text }}</small>
+                                {% endif %}
+                            </div>
+                            <span class="badge bg-light text-muted">Q{{ loop.index }}</span>
+                        </div>
+
+                        <div class="row g-2">
+                            {% for option in question.options %}
+                            <div class="col-6 col-md-4 col-lg-2">
+                                <input type="radio"
+                                       class="btn-check"
+                                       name="{{ question.id }}"
+                                       id="{{ question.id }}_{{ option.value }}"
+                                       value="{{ option.value }}"
+                                       autocomplete="off"
+                                       onchange="handleAnswer('{{ question.id }}', {{ option.value }})">
+                                <label class="btn btn-outline-secondary w-100 h-100 d-flex flex-column align-items-center justify-content-center py-2 px-1"
+                                       for="{{ question.id }}_{{ option.value }}"
+                                       title="{{ option.description }}">
+                                    <span class="fw-semibold small">{{ option.label }}</span>
+                                    <small class="text-muted d-none d-md-block" style="font-size: 0.7rem;">{{ option.value }}/5</small>
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+
+                <!-- Dimension Navigation -->
+                <div class="d-flex justify-content-between mt-4">
+                    {% if not loop.first %}
+                    <button class="btn btn-outline-secondary" onclick="navigateDimension('{{ dimensions.keys()|list|join(',') }}'.split(',')[{{ loop.index0 - 1 }}])">
+                        <i class="bi bi-arrow-left me-2"></i>Previous Section
+                    </button>
+                    {% else %}
+                    <div></div>
+                    {% endif %}
+
+                    {% if not loop.last %}
+                    <button class="btn btn-primary" onclick="navigateDimension('{{ dimensions.keys()|list|join(',') }}'.split(',')[{{ loop.index0 + 1 }}])">
+                        Next Section<i class="bi bi-arrow-right ms-2"></i>
+                    </button>
+                    {% else %}
+                    <button class="btn btn-success btn-lg" id="submit-btn" onclick="submitAssessment()" disabled>
+                        <i class="bi bi-check-circle me-2"></i>Complete Assessment
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Results Modal -->
+    <div class="modal fade" id="resultsModal" tabindex="-1" data-bs-backdrop="static">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header border-0 pb-0">
+                    <h4 class="modal-title">
+                        <i class="bi bi-clipboard-check text-primary me-2"></i>
+                        Assessment Results
+                    </h4>
+                </div>
+                <div class="modal-body" id="results-content">
+                    <!-- Results will be inserted here -->
+                </div>
+                <div class="modal-footer border-0">
+                    <a href="/chat" class="btn btn-primary">
+                        <i class="bi bi-chat-dots me-2"></i>Discuss with AI CFO
+                    </a>
+                    <a href="/dashboard" class="btn btn-outline-primary">
+                        <i class="bi bi-speedometer2 me-2"></i>View Dashboard
+                    </a>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.question-card {
+    transition: all 0.2s ease;
+}
+
+.question-card.answered {
+    border-left: 3px solid var(--cfi-primary) !important;
+}
+
+.btn-check:checked + .btn-outline-secondary {
+    background-color: var(--cfi-primary);
+    border-color: var(--cfi-primary);
+    color: white;
+}
+
+.nav-pills .nav-link {
+    color: var(--bs-body-color);
+    background-color: var(--bs-body-secondary);
+    border-radius: 0.5rem;
+    margin: 0 0.25rem;
+}
+
+.nav-pills .nav-link.active {
+    background-color: var(--cfi-primary);
+    color: white;
+}
+
+.nav-pills .nav-link .badge {
+    font-size: 0.65rem;
+}
+
+.nav-pills .nav-link.active .badge {
+    background-color: rgba(255,255,255,0.3) !important;
+}
+
+/* Score gauge */
+.score-gauge {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: conic-gradient(
+        var(--gauge-color, var(--cfi-primary)) calc(var(--score, 0) * 3.6deg),
+        var(--bs-body-secondary) 0
+    );
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+}
+
+.score-gauge-inner {
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    background: var(--bs-body-bg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.dimension-bar {
+    height: 8px;
+    background: var(--bs-body-secondary);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.dimension-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.5s ease;
+}
+</style>
+
+<script>
+// Store answers
+const answers = {};
+const dimensions = {{ dimensions|tojson }};
+const questionCounts = {{ questions_by_dimension|map('length')|list|tojson }};
+const dimensionIds = Object.keys(dimensions);
+const totalQuestions = {{ total_questions }};
+
+// Initialize dimension counts
+const dimensionAnswerCounts = {};
+dimensionIds.forEach(id => dimensionAnswerCounts[id] = 0);
+
+function handleAnswer(questionId, value) {
+    const dimId = questionId.split('_')[0] === 'cv' ? 'cash_visibility' :
+                  questionId.split('_')[0] === 'ar' ? 'receivables' :
+                  questionId.split('_')[0] === 'ap' ? 'payables' :
+                  questionId.split('_')[0] === 'wc' ? 'working_capital' : 'planning';
+
+    // Track if this is a new answer
+    const isNewAnswer = !(questionId in answers);
+
+    answers[questionId] = value;
+
+    // Mark card as answered
+    document.getElementById('card-' + questionId).classList.add('answered');
+
+    // Update dimension count if new answer
+    if (isNewAnswer) {
+        dimensionAnswerCounts[dimId]++;
+        updateProgress();
+    }
+}
+
+function updateProgress() {
+    const answeredCount = Object.keys(answers).length;
+    const percentage = (answeredCount / totalQuestions) * 100;
+
+    // Update progress bar
+    document.getElementById('progress-bar').style.width = percentage + '%';
+    document.getElementById('progress-count').textContent = `${answeredCount} / ${totalQuestions} questions`;
+
+    if (percentage < 25) {
+        document.getElementById('progress-text').textContent = 'Getting started...';
+    } else if (percentage < 50) {
+        document.getElementById('progress-text').textContent = 'Making progress!';
+    } else if (percentage < 75) {
+        document.getElementById('progress-text').textContent = 'More than halfway there!';
+    } else if (percentage < 100) {
+        document.getElementById('progress-text').textContent = 'Almost done!';
+    } else {
+        document.getElementById('progress-text').textContent = 'Complete! Ready to submit.';
+    }
+
+    // Update dimension badges
+    dimensionIds.forEach((dimId, index) => {
+        const total = questionCounts[index];
+        const answered = dimensionAnswerCounts[dimId];
+        const badge = document.getElementById('badge-' + dimId);
+        badge.textContent = `${answered}/${total}`;
+
+        if (answered === total) {
+            badge.classList.remove('bg-secondary');
+            badge.classList.add('bg-success');
+        }
+    });
+
+    // Enable submit button when all answered
+    document.getElementById('submit-btn').disabled = answeredCount < totalQuestions;
+}
+
+function navigateDimension(dimId) {
+    const tab = document.getElementById('tab-' + dimId);
+    if (tab) {
+        tab.click();
+        window.scrollTo(0, 0);
+    }
+}
+
+async function submitAssessment() {
+    const submitBtn = document.getElementById('submit-btn');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Calculating...';
+
+    try {
+        const response = await fetch('/api/assessment/submit', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ answers: answers })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            showResults(result.assessment);
+        } else {
+            alert('Error: ' + (result.error || 'Unknown error'));
+        }
+    } catch (error) {
+        alert('Error submitting assessment: ' + error.message);
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="bi bi-check-circle me-2"></i>Complete Assessment';
+    }
+}
+
+function showResults(assessment) {
+    const content = document.getElementById('results-content');
+
+    // Determine score color
+    let scoreColor = '#dc3545'; // red
+    if (assessment.overall_score >= 80) scoreColor = '#198754'; // green
+    else if (assessment.overall_score >= 60) scoreColor = '#ffc107'; // yellow
+    else if (assessment.overall_score >= 40) scoreColor = '#fd7e14'; // orange
+
+    let html = `
+        <!-- Overall Score -->
+        <div class="text-center mb-4">
+            <div class="score-gauge" style="--score: ${assessment.overall_score}; --gauge-color: ${scoreColor}">
+                <div class="score-gauge-inner">
+                    <div class="display-4 fw-bold" style="color: ${scoreColor}">${Math.round(assessment.overall_score)}</div>
+                    <div class="text-muted">out of 100</div>
+                    <div class="badge" style="background-color: ${scoreColor}">${assessment.overall_grade} - ${assessment.overall_level.replace('_', ' ')}</div>
+                </div>
+            </div>
+            <div class="mt-3">
+                <span class="badge ${assessment.risk_level === 'low' ? 'bg-success' : assessment.risk_level === 'medium' ? 'bg-warning text-dark' : assessment.risk_level === 'high' ? 'bg-danger' : 'bg-dark'}">
+                    ${assessment.risk_level.toUpperCase()} RISK
+                </span>
+            </div>
+        </div>
+
+        <!-- Dimension Scores -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-transparent">
+                <h5 class="mb-0"><i class="bi bi-bar-chart me-2"></i>Dimension Scores</h5>
+            </div>
+            <div class="card-body">
+                ${Object.entries(assessment.dimension_scores).map(([dimId, ds]) => {
+                    const dim = dimensions[dimId];
+                    let barColor = '#dc3545';
+                    if (ds.percentage >= 80) barColor = '#198754';
+                    else if (ds.percentage >= 60) barColor = '#ffc107';
+                    else if (ds.percentage >= 40) barColor = '#fd7e14';
+
+                    return `
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="fw-semibold">
+                                    <i class="bi ${dim.icon} me-2" style="color: ${dim.color}"></i>
+                                    ${ds.dimension_name}
+                                </span>
+                                <span class="badge" style="background-color: ${barColor}">${Math.round(ds.percentage)}% (${ds.grade})</span>
+                            </div>
+                            <div class="dimension-bar">
+                                <div class="dimension-bar-fill" style="width: ${ds.percentage}%; background-color: ${barColor}"></div>
+                            </div>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Strengths -->
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="bi bi-check-circle me-2"></i>Strengths</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-unstyled mb-0">
+                            ${assessment.strengths.length > 0 ?
+                                assessment.strengths.map(s => `<li class="mb-2"><i class="bi bi-check text-success me-2"></i>${s}</li>`).join('') :
+                                '<li class="text-muted">No major strengths identified</li>'
+                            }
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gaps -->
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-warning">
+                        <h5 class="mb-0"><i class="bi bi-exclamation-triangle me-2"></i>Areas for Improvement</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-unstyled mb-0">
+                            ${assessment.gaps.length > 0 ?
+                                assessment.gaps.map(g => `<li class="mb-2"><i class="bi bi-arrow-right text-warning me-2"></i>${g}</li>`).join('') :
+                                '<li class="text-muted">No major gaps identified</li>'
+                            }
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recommendations -->
+        <div class="card border-0 shadow-sm mt-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-lightbulb me-2"></i>Recommendations</h5>
+            </div>
+            <div class="card-body">
+                ${assessment.recommendations.slice(0, 5).map((rec, idx) => `
+                    <div class="d-flex mb-3 ${idx < assessment.recommendations.length - 1 ? 'border-bottom pb-3' : ''}">
+                        <div class="flex-shrink-0 me-3">
+                            <span class="badge ${rec.priority === 'high' ? 'bg-danger' : rec.priority === 'medium' ? 'bg-warning text-dark' : 'bg-secondary'}">
+                                ${rec.priority.toUpperCase()}
+                            </span>
+                        </div>
+                        <div>
+                            <h6 class="mb-1">${rec.title}</h6>
+                            <p class="text-muted small mb-1">${rec.description}</p>
+                            <small class="text-muted">
+                                <i class="bi bi-clock me-1"></i>${rec.timeframe}
+                                <span class="mx-2">|</span>
+                                <i class="bi bi-lightning me-1"></i>${rec.effort} effort
+                            </small>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+    `;
+
+    content.innerHTML = html;
+
+    // Show modal
+    const modal = new bootstrap.Modal(document.getElementById('resultsModal'));
+    modal.show();
+}
+
+// Load any saved answers on page load
+document.addEventListener('DOMContentLoaded', function() {
+    // Check for saved answers in sessionStorage
+    const savedAnswers = sessionStorage.getItem('assessment_answers');
+    if (savedAnswers) {
+        const parsed = JSON.parse(savedAnswers);
+        Object.entries(parsed).forEach(([qId, value]) => {
+            const radio = document.getElementById(`${qId}_${value}`);
+            if (radio) {
+                radio.checked = true;
+                handleAnswer(qId, value);
+            }
+        });
+    }
+
+    // Auto-save answers
+    setInterval(() => {
+        if (Object.keys(answers).length > 0) {
+            sessionStorage.setItem('assessment_answers', JSON.stringify(answers));
+        }
+    }, 5000);
+});
+</script>
+{% endblock %}

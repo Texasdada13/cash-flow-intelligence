@@ -6,119 +6,402 @@
 <div class="container py-5">
     <!-- Hero Section -->
     <div class="text-center mb-5">
-        <h1 class="display-4 fw-bold mb-3">
-            <i class="bi bi-graph-up-arrow text-primary"></i>
+        <div class="mb-4">
+            <span class="badge bg-success-subtle text-success px-3 py-2 rounded-pill">
+                <i class="bi bi-stars me-1"></i> AI-Powered Financial Intelligence
+            </span>
+        </div>
+        <h1 class="display-3 fw-bold mb-3">
             Cash Flow Intelligence
         </h1>
-        <p class="lead text-muted mb-4">
-            AI-powered cash flow analysis and forecasting for small and medium businesses.
-            <br>Your Virtual CFO, powered by Claude AI.
+        <p class="lead text-muted mb-4 mx-auto" style="max-width: 700px;">
+            Transform your financial operations with AI-powered cash flow analysis,
+            forecasting, and strategic recommendations. Your Virtual CFO is ready.
         </p>
-        <div class="d-flex justify-content-center gap-3">
-            <a href="/dashboard" class="btn btn-primary btn-lg">
-                <i class="bi bi-speedometer2 me-2"></i>Go to Dashboard
+        <div class="d-flex justify-content-center gap-3 flex-wrap">
+            <a href="/assessment" class="btn btn-primary btn-lg">
+                <i class="bi bi-clipboard-check me-2"></i>Start Assessment
             </a>
             <a href="/chat" class="btn btn-outline-primary btn-lg">
-                <i class="bi bi-chat-dots me-2"></i>Talk to AI Consultant
+                <i class="bi bi-chat-dots me-2"></i>Talk to AI CFO
             </a>
         </div>
     </div>
 
-    <!-- Features -->
-    <div class="row g-4 mt-5">
-        <div class="col-md-4">
-            <div class="card h-100">
-                <div class="card-body text-center p-4">
-                    <div class="display-5 text-primary mb-3">
-                        <i class="bi bi-graph-up"></i>
+    <!-- Feature Cards Grid -->
+    <div class="row g-4 mt-4" id="features">
+        <!-- Card 1: Assessment -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card feature-card h-100 border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="feature-icon mb-3">
+                        <i class="bi bi-clipboard-check"></i>
                     </div>
-                    <h4>Cash Flow Forecasting</h4>
-                    <p class="text-muted">
+                    <h4 class="card-title mb-3">Cash Flow Assessment</h4>
+                    <p class="card-text text-muted mb-4">
+                        Comprehensive evaluation of your cash management practices across
+                        5 key dimensions: visibility, receivables, payables, working capital,
+                        and financial planning.
+                    </p>
+                    <ul class="list-unstyled small text-muted mb-4">
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>40+ diagnostic questions</li>
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Health score calculation</li>
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Gap analysis & priorities</li>
+                    </ul>
+                    <a href="/assessment" class="btn btn-outline-primary w-100">
+                        <i class="bi bi-arrow-right me-2"></i>Start Assessment
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 2: AI CFO Consultant -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card feature-card h-100 border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="feature-icon mb-3">
+                        <i class="bi bi-robot"></i>
+                    </div>
+                    <h4 class="card-title mb-3">AI CFO Consultant</h4>
+                    <p class="card-text text-muted mb-4">
+                        Get instant, expert-level financial advice through our conversational
+                        AI. Ask questions about your cash position, get recommendations, and
+                        explore scenarios.
+                    </p>
+                    <ul class="list-unstyled small text-muted mb-4">
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Context-aware responses</li>
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>7 conversation modes</li>
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Actionable recommendations</li>
+                    </ul>
+                    <a href="/chat" class="btn btn-outline-primary w-100">
+                        <i class="bi bi-arrow-right me-2"></i>Start Conversation
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 3: Cash Flow Forecasting -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card feature-card h-100 border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="feature-icon mb-3">
+                        <i class="bi bi-graph-up-arrow"></i>
+                    </div>
+                    <h4 class="card-title mb-3">Cash Flow Forecasting</h4>
+                    <p class="card-text text-muted mb-4">
                         Predict your cash position with AI-powered time series analysis.
-                        Plan for multiple scenarios.
+                        Plan ahead with multiple scenario projections and runway calculations.
                     </p>
+                    <ul class="list-unstyled small text-muted mb-4">
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>6-12 month projections</li>
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Multi-scenario analysis</li>
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Cash runway alerts</li>
+                    </ul>
+                    <a href="/dashboard" class="btn btn-outline-primary w-100">
+                        <i class="bi bi-arrow-right me-2"></i>View Forecasts
+                    </a>
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card h-100">
-                <div class="card-body text-center p-4">
-                    <div class="display-5 text-success mb-3">
-                        <i class="bi bi-heart-pulse"></i>
+
+        <!-- Card 4: Industry Benchmarks -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card feature-card h-100 border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="feature-icon mb-3">
+                        <i class="bi bi-bar-chart-line"></i>
                     </div>
-                    <h4>Financial Health Score</h4>
-                    <p class="text-muted">
-                        Understand your financial health at a glance with multi-dimensional
-                        scoring and benchmarks.
+                    <h4 class="card-title mb-3">Industry Benchmarks</h4>
+                    <p class="card-text text-muted mb-4">
+                        Compare your cash flow metrics against industry peers. Identify
+                        performance gaps and set realistic improvement targets based on
+                        best practices.
                     </p>
+                    <ul class="list-unstyled small text-muted mb-4">
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>10+ KPI comparisons</li>
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Industry-specific benchmarks</li>
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Percentile rankings</li>
+                    </ul>
+                    <a href="/dashboard" class="btn btn-outline-primary w-100">
+                        <i class="bi bi-arrow-right me-2"></i>View Benchmarks
+                    </a>
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card h-100">
-                <div class="card-body text-center p-4">
-                    <div class="display-5 text-info mb-3">
-                        <i class="bi bi-chat-dots"></i>
+
+        <!-- Card 5: Framework Generator -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card feature-card h-100 border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="feature-icon mb-3">
+                        <i class="bi bi-file-earmark-text"></i>
                     </div>
-                    <h4>AI CFO Consultant</h4>
-                    <p class="text-muted">
-                        Get expert financial advice through conversational AI.
-                        Ask questions, get actionable insights.
+                    <h4 class="card-title mb-3">Framework Generator</h4>
+                    <p class="card-text text-muted mb-4">
+                        Generate customized cash management frameworks and policies tailored
+                        to your business. From credit policies to working capital strategies.
                     </p>
+                    <ul class="list-unstyled small text-muted mb-4">
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Cash management policies</li>
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Credit & collections</li>
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Working capital strategy</li>
+                    </ul>
+                    <a href="/frameworks" class="btn btn-outline-primary w-100">
+                        <i class="bi bi-arrow-right me-2"></i>Generate Framework
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 6: Report Generator -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card feature-card h-100 border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="feature-icon mb-3">
+                        <i class="bi bi-file-earmark-pdf"></i>
+                    </div>
+                    <h4 class="card-title mb-3">Report Generator</h4>
+                    <p class="card-text text-muted mb-4">
+                        Create professional cash flow reports for stakeholders. Board
+                        presentations, investor updates, banker communications, and
+                        internal reviews.
+                    </p>
+                    <ul class="list-unstyled small text-muted mb-4">
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Executive summaries</li>
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Board presentations</li>
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Lender packages</li>
+                    </ul>
+                    <a href="/reports" class="btn btn-outline-primary w-100">
+                        <i class="bi bi-arrow-right me-2"></i>Generate Report
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Key Metrics Highlight -->
+    <div class="mt-5 pt-5">
+        <div class="row text-center g-4">
+            <div class="col-6 col-md-3">
+                <div class="p-4 bg-body-secondary rounded-3">
+                    <div class="display-5 fw-bold text-primary">40+</div>
+                    <div class="text-muted">Diagnostic Questions</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="p-4 bg-body-secondary rounded-3">
+                    <div class="display-5 fw-bold text-primary">5</div>
+                    <div class="text-muted">Assessment Dimensions</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="p-4 bg-body-secondary rounded-3">
+                    <div class="display-5 fw-bold text-primary">6</div>
+                    <div class="text-muted">Industry Sectors</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="p-4 bg-body-secondary rounded-3">
+                    <div class="display-5 fw-bold text-primary">12</div>
+                    <div class="text-muted">Month Forecasts</div>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- How It Works -->
-    <div class="mt-5 pt-5">
-        <h2 class="text-center mb-4">How It Works</h2>
+    <div class="mt-5 pt-5" id="how-it-works">
+        <h2 class="text-center mb-2 fw-bold">How It Works</h2>
+        <p class="text-center text-muted mb-5">Get started in minutes and transform your cash flow management</p>
+
         <div class="row g-4">
             <div class="col-md-3">
                 <div class="text-center">
-                    <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
-                        <span class="h4 mb-0">1</span>
+                    <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px;">
+                        <span class="h4 mb-0 fw-bold">1</span>
                     </div>
-                    <h5 class="mt-3">Add Your Company</h5>
-                    <p class="text-muted small">Enter basic company information to get started</p>
+                    <h5 class="fw-semibold">Complete Assessment</h5>
+                    <p class="text-muted small">Answer questions about your cash management practices to get your health score</p>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="text-center">
-                    <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
-                        <span class="h4 mb-0">2</span>
+                    <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px;">
+                        <span class="h4 mb-0 fw-bold">2</span>
                     </div>
-                    <h5 class="mt-3">Upload Financial Data</h5>
-                    <p class="text-muted small">Import your P&L and balance sheet data</p>
+                    <h5 class="fw-semibold">Review Analysis</h5>
+                    <p class="text-muted small">Get detailed insights into your cash position, risks, and improvement opportunities</p>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="text-center">
-                    <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
-                        <span class="h4 mb-0">3</span>
+                    <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px;">
+                        <span class="h4 mb-0 fw-bold">3</span>
                     </div>
-                    <h5 class="mt-3">Get AI Analysis</h5>
-                    <p class="text-muted small">AI analyzes your data and generates insights</p>
+                    <h5 class="fw-semibold">Consult AI CFO</h5>
+                    <p class="text-muted small">Discuss findings with the AI consultant and explore strategies</p>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="text-center">
-                    <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
-                        <span class="h4 mb-0">4</span>
+                    <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px;">
+                        <span class="h4 mb-0 fw-bold">4</span>
                     </div>
-                    <h5 class="mt-3">Take Action</h5>
-                    <p class="text-muted small">Use insights to improve your cash position</p>
+                    <h5 class="fw-semibold">Take Action</h5>
+                    <p class="text-muted small">Implement recommendations, generate frameworks, and track improvement</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Target Audience -->
+    <div class="mt-5 pt-5">
+        <div class="row align-items-center">
+            <div class="col-lg-6 mb-4 mb-lg-0">
+                <h2 class="fw-bold mb-3">Built for Finance Leaders</h2>
+                <p class="text-muted mb-4">
+                    Cash Flow Intelligence is designed specifically for CFOs, Controllers,
+                    and Finance Teams at small and medium businesses who need enterprise-grade
+                    cash management without the complexity.
+                </p>
+                <div class="row g-3">
+                    <div class="col-sm-6">
+                        <div class="d-flex align-items-start">
+                            <div class="flex-shrink-0">
+                                <i class="bi bi-person-badge text-primary fs-4 me-3"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-1">CFOs & Controllers</h6>
+                                <small class="text-muted">Strategic cash management</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="d-flex align-items-start">
+                            <div class="flex-shrink-0">
+                                <i class="bi bi-people text-primary fs-4 me-3"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-1">Finance Teams</h6>
+                                <small class="text-muted">Daily cash operations</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="d-flex align-items-start">
+                            <div class="flex-shrink-0">
+                                <i class="bi bi-building text-primary fs-4 me-3"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-1">Business Owners</h6>
+                                <small class="text-muted">Cash visibility & control</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="d-flex align-items-start">
+                            <div class="flex-shrink-0">
+                                <i class="bi bi-calculator text-primary fs-4 me-3"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-1">Fractional CFOs</h6>
+                                <small class="text-muted">Multi-client analysis</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card border-0 bg-body-secondary">
+                    <div class="card-body p-4">
+                        <h5 class="card-title mb-3">
+                            <i class="bi bi-quote text-primary me-2"></i>
+                            Common Challenges We Solve
+                        </h5>
+                        <ul class="list-unstyled mb-0">
+                            <li class="mb-3 d-flex">
+                                <i class="bi bi-x-circle text-danger me-2 flex-shrink-0"></i>
+                                <span>"We don't have real-time visibility into our cash position"</span>
+                            </li>
+                            <li class="mb-3 d-flex">
+                                <i class="bi bi-x-circle text-danger me-2 flex-shrink-0"></i>
+                                <span>"Our collections process is manual and inconsistent"</span>
+                            </li>
+                            <li class="mb-3 d-flex">
+                                <i class="bi bi-x-circle text-danger me-2 flex-shrink-0"></i>
+                                <span>"We're surprised by cash crunches we didn't see coming"</span>
+                            </li>
+                            <li class="mb-3 d-flex">
+                                <i class="bi bi-x-circle text-danger me-2 flex-shrink-0"></i>
+                                <span>"We need better cash forecasting for planning"</span>
+                            </li>
+                            <li class="d-flex">
+                                <i class="bi bi-x-circle text-danger me-2 flex-shrink-0"></i>
+                                <span>"I don't have time to analyze cash flow data"</span>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- CTA -->
-    <div class="text-center mt-5 pt-5">
-        <h3>Ready to optimize your cash flow?</h3>
-        <a href="/dashboard" class="btn btn-primary btn-lg mt-3">
-            Get Started Now <i class="bi bi-arrow-right ms-2"></i>
-        </a>
+    <div class="text-center mt-5 pt-5 pb-4">
+        <div class="bg-primary bg-gradient text-white rounded-4 p-5">
+            <h2 class="fw-bold mb-3">Ready to transform your cash flow management?</h2>
+            <p class="lead mb-4 opacity-75">Start with a free assessment and get your Cash Flow Health Score in minutes.</p>
+            <div class="d-flex justify-content-center gap-3 flex-wrap">
+                <a href="/assessment" class="btn btn-light btn-lg">
+                    <i class="bi bi-clipboard-check me-2"></i>Start Free Assessment
+                </a>
+                <a href="/dashboard" class="btn btn-outline-light btn-lg">
+                    <i class="bi bi-speedometer2 me-2"></i>View Dashboard
+                </a>
+            </div>
+        </div>
     </div>
 </div>
+
+<style>
+.feature-card {
+    transition: all 0.3s ease;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.5rem 2rem rgba(0, 0, 0, 0.15) !important;
+}
+
+.feature-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--cfi-primary) 0%, var(--cfi-primary-light) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.75rem;
+}
+
+.feature-card .btn-outline-primary {
+    border-color: var(--cfi-primary);
+    color: var(--cfi-primary);
+}
+
+.feature-card .btn-outline-primary:hover {
+    background-color: var(--cfi-primary);
+    color: white;
+}
+
+[data-bs-theme="dark"] .feature-card {
+    background-color: var(--bs-body-bg);
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+[data-bs-theme="dark"] .bg-body-secondary {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+}
+</style>
 {% endblock %}
