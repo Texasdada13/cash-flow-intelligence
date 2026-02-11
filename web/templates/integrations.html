@@ -1,0 +1,589 @@
+{% extends "base.html" %}
+
+{% block title %}Integrations - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900">Data Integrations</h1>
+            <p class="text-gray-600 mt-1">Connect your accounting software for real-time cash flow insights</p>
+        </div>
+        <button onclick="enableDemoMode()" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+            </svg>
+            Try Demo Mode
+        </button>
+    </div>
+
+    <!-- Success Alert -->
+    <div id="successAlert" class="hidden bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg mb-6">
+        <div class="flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <span id="successMessage"></span>
+        </div>
+    </div>
+
+    <!-- Integration Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        <!-- QuickBooks -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="bg-gradient-to-r from-green-600 to-green-700 px-6 py-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 bg-white rounded-lg flex items-center justify-center">
+                        <span class="text-green-600 font-bold text-lg">QB</span>
+                    </div>
+                    <div class="text-white">
+                        <h3 class="font-semibold text-lg">QuickBooks Online</h3>
+                        <p class="text-green-100 text-sm">Accounting & invoicing</p>
+                    </div>
+                </div>
+            </div>
+            <div class="p-6">
+                <div id="qb-status" class="mb-4">
+                    <div class="flex items-center gap-2 text-gray-500">
+                        <div class="w-3 h-3 bg-gray-300 rounded-full"></div>
+                        <span>Not connected</span>
+                    </div>
+                </div>
+                <p class="text-gray-600 text-sm mb-4">
+                    Import invoices, bills, and bank transactions automatically from QuickBooks Online.
+                </p>
+                <ul class="text-sm text-gray-500 mb-4 space-y-1">
+                    <li class="flex items-center gap-2">
+                        <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        Accounts Receivable & Payable
+                    </li>
+                    <li class="flex items-center gap-2">
+                        <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        Bank Transactions
+                    </li>
+                    <li class="flex items-center gap-2">
+                        <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        Financial Reports
+                    </li>
+                </ul>
+                <button id="qb-connect-btn" onclick="connectQuickBooks()" class="w-full bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
+                    Connect QuickBooks
+                </button>
+                <button id="qb-disconnect-btn" onclick="disconnectQuickBooks()" class="hidden w-full bg-red-100 text-red-700 px-4 py-2 rounded-lg hover:bg-red-200">
+                    Disconnect
+                </button>
+            </div>
+        </div>
+
+        <!-- Xero -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 bg-white rounded-lg flex items-center justify-center">
+                        <span class="text-blue-600 font-bold text-lg">X</span>
+                    </div>
+                    <div class="text-white">
+                        <h3 class="font-semibold text-lg">Xero</h3>
+                        <p class="text-blue-100 text-sm">Cloud accounting</p>
+                    </div>
+                </div>
+            </div>
+            <div class="p-6">
+                <div id="xero-status" class="mb-4">
+                    <div class="flex items-center gap-2 text-gray-500">
+                        <div class="w-3 h-3 bg-gray-300 rounded-full"></div>
+                        <span>Not connected</span>
+                    </div>
+                </div>
+                <p class="text-gray-600 text-sm mb-4">
+                    Sync your Xero data for comprehensive cash flow analysis and forecasting.
+                </p>
+                <ul class="text-sm text-gray-500 mb-4 space-y-1">
+                    <li class="flex items-center gap-2">
+                        <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        Sales & Purchase Invoices
+                    </li>
+                    <li class="flex items-center gap-2">
+                        <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        Bank Reconciliation
+                    </li>
+                    <li class="flex items-center gap-2">
+                        <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        Aging Reports
+                    </li>
+                </ul>
+                <button id="xero-connect-btn" onclick="connectXero()" class="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                    Connect Xero
+                </button>
+                <button id="xero-disconnect-btn" onclick="disconnectXero()" class="hidden w-full bg-red-100 text-red-700 px-4 py-2 rounded-lg hover:bg-red-200">
+                    Disconnect
+                </button>
+            </div>
+        </div>
+
+        <!-- Demo Mode -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="bg-gradient-to-r from-purple-500 to-purple-600 px-6 py-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 bg-white rounded-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                        </svg>
+                    </div>
+                    <div class="text-white">
+                        <h3 class="font-semibold text-lg">Demo Mode</h3>
+                        <p class="text-purple-100 text-sm">Try with sample data</p>
+                    </div>
+                </div>
+            </div>
+            <div class="p-6">
+                <div id="demo-status" class="mb-4">
+                    <div class="flex items-center gap-2 text-gray-500">
+                        <div class="w-3 h-3 bg-gray-300 rounded-full"></div>
+                        <span>Not active</span>
+                    </div>
+                </div>
+                <p class="text-gray-600 text-sm mb-4">
+                    Explore all features with realistic sample data. No account required.
+                </p>
+                <ul class="text-sm text-gray-500 mb-4 space-y-1">
+                    <li class="flex items-center gap-2">
+                        <svg class="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        Sample invoices & bills
+                    </li>
+                    <li class="flex items-center gap-2">
+                        <svg class="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        Mock transactions
+                    </li>
+                    <li class="flex items-center gap-2">
+                        <svg class="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        Full feature access
+                    </li>
+                </ul>
+                <button onclick="enableDemoMode()" class="w-full bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700">
+                    Enable Demo Mode
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cash Flow Summary (shown when connected) -->
+    <div id="cashFlowSection" class="hidden">
+        <h2 class="text-xl font-semibold mb-4">Real-Time Cash Flow Summary</h2>
+
+        <!-- Summary Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl shadow-sm p-5 text-white">
+                <div class="text-sm opacity-80">Net Cash Flow</div>
+                <div class="text-2xl font-bold" id="netCashFlow">-</div>
+                <div class="text-sm opacity-80 mt-1" id="netCashFlowPeriod">Last 30 days</div>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
+                <div class="text-sm text-gray-500">AR Outstanding</div>
+                <div class="text-2xl font-bold text-green-600" id="arOutstanding">-</div>
+                <div class="text-sm text-gray-400" id="arInvoices">- invoices</div>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
+                <div class="text-sm text-gray-500">AP Outstanding</div>
+                <div class="text-2xl font-bold text-red-600" id="apOutstanding">-</div>
+                <div class="text-sm text-gray-400" id="apBills">- bills</div>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
+                <div class="text-sm text-gray-500">DSO / DPO</div>
+                <div class="text-2xl font-bold text-purple-600"><span id="dso">-</span> / <span id="dpo">-</span></div>
+                <div class="text-sm text-gray-400">days</div>
+            </div>
+        </div>
+
+        <!-- AR/AP Aging -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <!-- AR Aging -->
+            <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                <h3 class="text-lg font-semibold mb-4">Accounts Receivable Aging</h3>
+                <div id="arAgingChart" class="space-y-3">
+                    <!-- Filled by JS -->
+                </div>
+            </div>
+
+            <!-- AP Aging -->
+            <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                <h3 class="text-lg font-semibold mb-4">Accounts Payable Aging</h3>
+                <div id="apAgingChart" class="space-y-3">
+                    <!-- Filled by JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Alerts -->
+        <div id="alertsSection" class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 mb-6">
+            <h3 class="text-lg font-semibold mb-4">Cash Flow Alerts</h3>
+            <div id="alertsList" class="space-y-3">
+                <!-- Filled by JS -->
+            </div>
+        </div>
+
+        <!-- Recent Transactions -->
+        <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+            <h3 class="text-lg font-semibold mb-4">Recent Transactions</h3>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="text-left text-sm text-gray-500 border-b">
+                            <th class="pb-3">Date</th>
+                            <th class="pb-3">Description</th>
+                            <th class="pb-3">Account</th>
+                            <th class="pb-3 text-right">Amount</th>
+                            <th class="pb-3">Source</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transactionsTable" class="text-sm">
+                        <!-- Filled by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Check for connection success
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.has('connected')) {
+    const source = urlParams.get('connected');
+    showSuccess(`Successfully connected to ${source.charAt(0).toUpperCase() + source.slice(1)}!`);
+    // Remove param from URL
+    window.history.replaceState({}, document.title, window.location.pathname);
+}
+
+// Load integration status on page load
+loadIntegrationStatus();
+
+async function loadIntegrationStatus() {
+    try {
+        const response = await fetch('/api/integrations/status');
+        const data = await response.json();
+
+        let hasConnection = false;
+
+        for (const integration of data.integrations) {
+            if (integration.type === 'quickbooks') {
+                updateQuickBooksStatus(integration);
+                if (integration.is_connected) hasConnection = true;
+            } else if (integration.type === 'xero') {
+                updateXeroStatus(integration);
+                if (integration.is_connected) hasConnection = true;
+            } else if (integration.type === 'demo') {
+                updateDemoStatus(integration);
+                if (integration.is_connected) hasConnection = true;
+            }
+        }
+
+        if (hasConnection) {
+            loadCashFlowSummary();
+        }
+    } catch (error) {
+        console.error('Error loading integration status:', error);
+    }
+}
+
+function updateQuickBooksStatus(status) {
+    const statusEl = document.getElementById('qb-status');
+    const connectBtn = document.getElementById('qb-connect-btn');
+    const disconnectBtn = document.getElementById('qb-disconnect-btn');
+
+    if (status.is_connected) {
+        statusEl.innerHTML = `
+            <div class="flex items-center gap-2 text-green-600">
+                <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                <span>Connected</span>
+            </div>
+        `;
+        connectBtn.classList.add('hidden');
+        disconnectBtn.classList.remove('hidden');
+    } else {
+        statusEl.innerHTML = `
+            <div class="flex items-center gap-2 text-gray-500">
+                <div class="w-3 h-3 bg-gray-300 rounded-full"></div>
+                <span>Not connected</span>
+            </div>
+        `;
+        connectBtn.classList.remove('hidden');
+        disconnectBtn.classList.add('hidden');
+    }
+}
+
+function updateXeroStatus(status) {
+    const statusEl = document.getElementById('xero-status');
+    const connectBtn = document.getElementById('xero-connect-btn');
+    const disconnectBtn = document.getElementById('xero-disconnect-btn');
+
+    if (status.is_connected) {
+        statusEl.innerHTML = `
+            <div class="flex items-center gap-2 text-blue-600">
+                <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
+                <span>Connected</span>
+            </div>
+        `;
+        connectBtn.classList.add('hidden');
+        disconnectBtn.classList.remove('hidden');
+    } else {
+        statusEl.innerHTML = `
+            <div class="flex items-center gap-2 text-gray-500">
+                <div class="w-3 h-3 bg-gray-300 rounded-full"></div>
+                <span>Not connected</span>
+            </div>
+        `;
+        connectBtn.classList.remove('hidden');
+        disconnectBtn.classList.add('hidden');
+    }
+}
+
+function updateDemoStatus(status) {
+    const statusEl = document.getElementById('demo-status');
+
+    if (status.is_connected) {
+        statusEl.innerHTML = `
+            <div class="flex items-center gap-2 text-purple-600">
+                <div class="w-3 h-3 bg-purple-500 rounded-full"></div>
+                <span>Active</span>
+            </div>
+        `;
+    }
+}
+
+async function connectQuickBooks() {
+    try {
+        const response = await fetch('/api/integrations/quickbooks/auth-url');
+        const data = await response.json();
+        window.location.href = data.auth_url;
+    } catch (error) {
+        console.error('Error getting QuickBooks auth URL:', error);
+        alert('Failed to initiate QuickBooks connection');
+    }
+}
+
+async function disconnectQuickBooks() {
+    if (!confirm('Are you sure you want to disconnect QuickBooks?')) return;
+
+    try {
+        await fetch('/api/integrations/quickbooks/disconnect', { method: 'POST' });
+        loadIntegrationStatus();
+        showSuccess('QuickBooks disconnected');
+    } catch (error) {
+        console.error('Error disconnecting QuickBooks:', error);
+    }
+}
+
+async function connectXero() {
+    try {
+        const response = await fetch('/api/integrations/xero/auth-url');
+        const data = await response.json();
+        window.location.href = data.auth_url;
+    } catch (error) {
+        console.error('Error getting Xero auth URL:', error);
+        alert('Failed to initiate Xero connection');
+    }
+}
+
+async function disconnectXero() {
+    if (!confirm('Are you sure you want to disconnect Xero?')) return;
+
+    try {
+        await fetch('/api/integrations/xero/disconnect', { method: 'POST' });
+        loadIntegrationStatus();
+        showSuccess('Xero disconnected');
+    } catch (error) {
+        console.error('Error disconnecting Xero:', error);
+    }
+}
+
+async function enableDemoMode() {
+    try {
+        await fetch('/api/integrations/demo/enable', { method: 'POST' });
+        showSuccess('Demo mode enabled! Loading sample data...');
+        setTimeout(() => {
+            loadIntegrationStatus();
+        }, 500);
+    } catch (error) {
+        console.error('Error enabling demo mode:', error);
+    }
+}
+
+async function loadCashFlowSummary() {
+    try {
+        const response = await fetch('/api/integrations/cash-flow-summary?days=30');
+        const data = await response.json();
+
+        // Show the section
+        document.getElementById('cashFlowSection').classList.remove('hidden');
+
+        // Update summary cards
+        const netCashFlow = data.cash_flow.net_cash_flow;
+        document.getElementById('netCashFlow').textContent = formatCurrency(netCashFlow);
+        document.getElementById('netCashFlow').classList.add(netCashFlow >= 0 ? 'text-white' : 'text-red-200');
+
+        document.getElementById('arOutstanding').textContent = formatCurrency(data.accounts_receivable.outstanding);
+        document.getElementById('arInvoices').textContent = `${data.accounts_receivable.invoice_count} invoices`;
+
+        document.getElementById('apOutstanding').textContent = formatCurrency(data.accounts_payable.outstanding);
+        document.getElementById('apBills').textContent = `${data.accounts_payable.bill_count} bills`;
+
+        document.getElementById('dso').textContent = data.key_metrics.days_sales_outstanding.toFixed(0);
+        document.getElementById('dpo').textContent = data.key_metrics.days_payable_outstanding.toFixed(0);
+
+        // Render aging charts
+        renderAgingChart('arAgingChart', data.accounts_receivable.aging, 'green');
+        renderAgingChart('apAgingChart', data.accounts_payable.aging, 'red');
+
+        // Render alerts
+        renderAlerts(data.alerts);
+
+        // Load transactions
+        loadRecentTransactions();
+
+    } catch (error) {
+        console.error('Error loading cash flow summary:', error);
+    }
+}
+
+function renderAgingChart(elementId, aging, color) {
+    const container = document.getElementById(elementId);
+    const total = aging.current + aging['1_30_days'] + aging['31_60_days'] + aging['61_90_days'] + aging.over_90_days;
+
+    const buckets = [
+        { label: 'Current', value: aging.current },
+        { label: '1-30 Days', value: aging['1_30_days'] },
+        { label: '31-60 Days', value: aging['31_60_days'] },
+        { label: '61-90 Days', value: aging['61_90_days'] },
+        { label: '90+ Days', value: aging.over_90_days }
+    ];
+
+    const colors = color === 'green'
+        ? ['bg-green-500', 'bg-green-400', 'bg-yellow-400', 'bg-orange-400', 'bg-red-500']
+        : ['bg-blue-500', 'bg-blue-400', 'bg-yellow-400', 'bg-orange-400', 'bg-red-500'];
+
+    container.innerHTML = buckets.map((bucket, i) => {
+        const pct = total > 0 ? (bucket.value / total * 100) : 0;
+        return `
+            <div class="flex items-center gap-3">
+                <div class="w-24 text-sm text-gray-600">${bucket.label}</div>
+                <div class="flex-1 bg-gray-100 rounded-full h-4 overflow-hidden">
+                    <div class="${colors[i]} h-full rounded-full" style="width: ${pct}%"></div>
+                </div>
+                <div class="w-24 text-sm text-right font-medium">${formatCurrency(bucket.value)}</div>
+            </div>
+        `;
+    }).join('');
+}
+
+function renderAlerts(alerts) {
+    const container = document.getElementById('alertsList');
+
+    if (!alerts || alerts.length === 0) {
+        container.innerHTML = `
+            <div class="text-center py-4 text-gray-500">
+                <svg class="w-8 h-8 mx-auto mb-2 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <p>No alerts at this time</p>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = alerts.map(alert => {
+        const bgColor = alert.type === 'warning' ? 'bg-yellow-50 border-yellow-200' : 'bg-blue-50 border-blue-200';
+        const iconColor = alert.type === 'warning' ? 'text-yellow-600' : 'text-blue-600';
+
+        return `
+            <div class="p-4 rounded-lg border ${bgColor}">
+                <div class="flex items-start gap-3">
+                    <svg class="w-5 h-5 ${iconColor} mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                    </svg>
+                    <div>
+                        <div class="font-medium text-gray-900">${alert.category}</div>
+                        <div class="text-sm text-gray-600 mt-1">${alert.message}</div>
+                        <div class="text-sm text-gray-500 mt-2">
+                            <span class="font-medium">Recommendation:</span> ${alert.recommendation}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+async function loadRecentTransactions() {
+    try {
+        const response = await fetch('/api/integrations/transactions');
+        const data = await response.json();
+
+        const tbody = document.getElementById('transactionsTable');
+
+        if (!data.transactions || data.transactions.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="text-center py-8 text-gray-500">No transactions found</td>
+                </tr>
+            `;
+            return;
+        }
+
+        tbody.innerHTML = data.transactions.slice(0, 10).map(txn => `
+            <tr class="border-b">
+                <td class="py-3">${new Date(txn.date).toLocaleDateString()}</td>
+                <td class="py-3">${txn.description}</td>
+                <td class="py-3">${txn.account_name}</td>
+                <td class="py-3 text-right font-medium ${txn.amount >= 0 ? 'text-green-600' : 'text-red-600'}">
+                    ${formatCurrency(txn.amount)}
+                </td>
+                <td class="py-3">
+                    <span class="px-2 py-1 rounded text-xs ${txn.source === 'quickbooks' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}">
+                        ${txn.source}
+                    </span>
+                </td>
+            </tr>
+        `).join('');
+
+    } catch (error) {
+        console.error('Error loading transactions:', error);
+    }
+}
+
+function formatCurrency(amount) {
+    return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+    }).format(amount);
+}
+
+function showSuccess(message) {
+    const alert = document.getElementById('successAlert');
+    document.getElementById('successMessage').textContent = message;
+    alert.classList.remove('hidden');
+    setTimeout(() => alert.classList.add('hidden'), 5000);
+}
+</script>
+{% endblock %}

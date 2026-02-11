@@ -25,6 +25,7 @@ from src.patterns.benchmark_engine import create_cash_flow_benchmarks
 from src.patterns.risk_classification import create_cash_flow_risk_classifier
 from src.assessment import AssessmentEngine, ASSESSMENT_QUESTIONS, DIMENSIONS
 from src.assessment.questions import get_questions_by_dimension
+from src.integrations import IntegrationManager, IntegrationType, QuickBooksConfig, XeroConfig
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -1015,6 +1016,265 @@ Make it professional, concise, and actionable. Use appropriate formatting for th
         return jsonify({
             'benchmark': report.to_dict()
         })
+
+    # =============================================================================
+    # API Routes - Integrations (QuickBooks/Xero)
+    # =============================================================================
+
+    # Integration manager instance
+    _integration_manager = None
+
+    def get_integration_manager(demo_mode: bool = False) -> IntegrationManager:
+        """Get or create integration manager singleton"""
+        nonlocal _integration_manager
+        if _integration_manager is None:
+            _integration_manager = IntegrationManager()
+            if demo_mode or app.config.get('DEMO_MODE'):
+                _integration_manager.enable_demo_mode()
+            else:
+                # Configure from environment
+                if os.getenv('QUICKBOOKS_CLIENT_ID'):
+                    _integration_manager.configure_quickbooks()
+                if os.getenv('XERO_CLIENT_ID'):
+                    _integration_manager.configure_xero()
+        return _integration_manager
+
+    @app.route('/integrations')
+    def integrations_page():
+        """Integrations management page"""
+        manager = get_integration_manager()
+        statuses = manager.get_all_statuses()
+        return render_template('integrations.html',
+                             app_name=app.config['APP_NAME'],
+                             integrations=statuses)
+
+    @app.route('/api/integrations/status', methods=['GET'])
+    def api_integration_status():
+        """Get status of all integrations"""
+        manager = get_integration_manager()
+        statuses = manager.get_all_statuses()
+        return jsonify({
+            'integrations': [
+                {
+                    'type': s.integration_type.value,
+                    'is_connected': s.is_connected,
+                    'last_sync': s.last_sync.isoformat() if s.last_sync else None,
+                    'company_name': s.company_name,
+                    'error': s.error_message
+                }
+                for s in statuses
+            ]
+        })
+
+    @app.route('/api/integrations/demo/enable', methods=['POST'])
+    def api_enable_demo_integration():
+        """Enable demo mode for integrations"""
+        manager = get_integration_manager(demo_mode=True)
+        manager.enable_demo_mode()
+        return jsonify({'success': True, 'message': 'Demo mode enabled'})
+
+    # QuickBooks OAuth Flow
+    @app.route('/api/integrations/quickbooks/auth-url', methods=['GET'])
+    def api_quickbooks_auth_url():
+        """Get QuickBooks OAuth authorization URL"""
+        manager = get_integration_manager()
+        state = str(uuid.uuid4())
+        session['quickbooks_oauth_state'] = state
+        auth_url = manager.get_auth_url(IntegrationType.QUICKBOOKS, state)
+        return jsonify({'auth_url': auth_url, 'state': state})
+
+    @app.route('/integrations/quickbooks/callback')
+    def quickbooks_oauth_callback():
+        """Handle QuickBooks OAuth callback"""
+        code = request.args.get('code')
+        realm_id = request.args.get('realmId')
+        state = request.args.get('state')
+
+        # Verify state
+        stored_state = session.get('quickbooks_oauth_state')
+        if state != stored_state:
+            return render_template('integration_error.html',
+                                 error='Invalid OAuth state',
+                                 app_name=app.config['APP_NAME'])
+
+        if not code or not realm_id:
+            return render_template('integration_error.html',
+                                 error='Missing authorization code or realm ID',
+                                 app_name=app.config['APP_NAME'])
+
+        manager = get_integration_manager()
+        success = manager.handle_oauth_callback(IntegrationType.QUICKBOOKS, code, realm_id)
+
+        if success:
+            return redirect(url_for('integrations_page') + '?connected=quickbooks')
+        else:
+            return render_template('integration_error.html',
+                                 error='Failed to connect to QuickBooks',
+                                 app_name=app.config['APP_NAME'])
+
+    @app.route('/api/integrations/quickbooks/disconnect', methods=['POST'])
+    def api_disconnect_quickbooks():
+        """Disconnect QuickBooks integration"""
+        manager = get_integration_manager()
+        manager.disconnect(IntegrationType.QUICKBOOKS)
+        return jsonify({'success': True})
+
+    # Xero OAuth Flow
+    @app.route('/api/integrations/xero/auth-url', methods=['GET'])
+    def api_xero_auth_url():
+        """Get Xero OAuth authorization URL"""
+        manager = get_integration_manager()
+        state = str(uuid.uuid4())
+        session['xero_oauth_state'] = state
+        auth_url = manager.get_auth_url(IntegrationType.XERO, state)
+        return jsonify({'auth_url': auth_url, 'state': state})
+
+    @app.route('/integrations/xero/callback')
+    def xero_oauth_callback():
+        """Handle Xero OAuth callback"""
+        code = request.args.get('code')
+        state = request.args.get('state')
+
+        # Verify state
+        stored_state = session.get('xero_oauth_state')
+        if state != stored_state:
+            return render_template('integration_error.html',
+                                 error='Invalid OAuth state',
+                                 app_name=app.config['APP_NAME'])
+
+        if not code:
+            return render_template('integration_error.html',
+                                 error='Missing authorization code',
+                                 app_name=app.config['APP_NAME'])
+
+        manager = get_integration_manager()
+        success = manager.handle_oauth_callback(IntegrationType.XERO, code)
+
+        if success:
+            return redirect(url_for('integrations_page') + '?connected=xero')
+        else:
+            return render_template('integration_error.html',
+                                 error='Failed to connect to Xero',
+                                 app_name=app.config['APP_NAME'])
+
+    @app.route('/api/integrations/xero/disconnect', methods=['POST'])
+    def api_disconnect_xero():
+        """Disconnect Xero integration"""
+        manager = get_integration_manager()
+        manager.disconnect(IntegrationType.XERO)
+        return jsonify({'success': True})
+
+    # Unified Data APIs
+    @app.route('/api/integrations/invoices', methods=['GET'])
+    def api_integration_invoices():
+        """Get invoices from connected integrations"""
+        manager = get_integration_manager()
+        source = request.args.get('source')
+
+        source_type = None
+        if source:
+            try:
+                source_type = IntegrationType(source)
+            except ValueError:
+                return jsonify({'error': f'Invalid source: {source}'}), 400
+
+        invoices = manager.get_invoices(source=source_type)
+        return jsonify({
+            'invoices': [
+                {
+                    'id': inv.id,
+                    'source': inv.source.value,
+                    'customer_name': inv.customer_name,
+                    'invoice_number': inv.invoice_number,
+                    'total_amount': inv.total_amount,
+                    'amount_due': inv.amount_due,
+                    'amount_paid': inv.amount_paid,
+                    'issue_date': inv.issue_date.isoformat(),
+                    'due_date': inv.due_date.isoformat() if inv.due_date else None,
+                    'status': inv.status,
+                    'days_outstanding': inv.days_outstanding
+                }
+                for inv in invoices
+            ],
+            'count': len(invoices)
+        })
+
+    @app.route('/api/integrations/bills', methods=['GET'])
+    def api_integration_bills():
+        """Get bills from connected integrations"""
+        manager = get_integration_manager()
+        source = request.args.get('source')
+
+        source_type = None
+        if source:
+            try:
+                source_type = IntegrationType(source)
+            except ValueError:
+                return jsonify({'error': f'Invalid source: {source}'}), 400
+
+        bills = manager.get_bills(source=source_type)
+        return jsonify({
+            'bills': [
+                {
+                    'id': bill.id,
+                    'source': bill.source.value,
+                    'vendor_name': bill.vendor_name,
+                    'bill_number': bill.bill_number,
+                    'total_amount': bill.total_amount,
+                    'amount_due': bill.amount_due,
+                    'amount_paid': bill.amount_paid,
+                    'issue_date': bill.issue_date.isoformat(),
+                    'due_date': bill.due_date.isoformat() if bill.due_date else None,
+                    'status': bill.status
+                }
+                for bill in bills
+            ],
+            'count': len(bills)
+        })
+
+    @app.route('/api/integrations/transactions', methods=['GET'])
+    def api_integration_transactions():
+        """Get bank transactions from connected integrations"""
+        manager = get_integration_manager()
+        transactions = manager.get_transactions()
+        return jsonify({
+            'transactions': [
+                {
+                    'id': txn.id,
+                    'source': txn.source.value,
+                    'date': txn.date.isoformat(),
+                    'amount': txn.amount,
+                    'description': txn.description,
+                    'account_name': txn.account_name,
+                    'transaction_type': txn.transaction_type,
+                    'category': txn.category
+                }
+                for txn in transactions
+            ],
+            'count': len(transactions)
+        })
+
+    @app.route('/api/integrations/ar-aging', methods=['GET'])
+    def api_integration_ar_aging():
+        """Get AR aging report from integrations"""
+        manager = get_integration_manager()
+        aging = manager.get_ar_aging()
+        return jsonify(aging)
+
+    @app.route('/api/integrations/ap-aging', methods=['GET'])
+    def api_integration_ap_aging():
+        """Get AP aging report from integrations"""
+        manager = get_integration_manager()
+        aging = manager.get_ap_aging()
+        return jsonify(aging)
+
+    @app.route('/api/integrations/cash-flow-summary', methods=['GET'])
+    def api_integration_cash_flow_summary():
+        """Get unified cash flow summary from all integrations"""
+        manager = get_integration_manager()
+        days = request.args.get('days', 30, type=int)
+        summary = manager.get_unified_cash_flow_summary(days=days)
+        return jsonify(summary)
 
     # =============================================================================
     # Error Handlers
