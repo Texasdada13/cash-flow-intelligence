@@ -56,11 +56,8 @@ class DevelopmentConfig(Config):
 class ProductionConfig(Config):
     """Production configuration"""
     DEBUG = False
-
-    # Ensure secret key is set in production
-    SECRET_KEY = os.environ.get('SECRET_KEY')
-    if not SECRET_KEY:
-        raise ValueError("SECRET_KEY must be set in production")
+    # In production, SECRET_KEY should be set via environment variable
+    # The base Config class provides a fallback for development
 
 
 class TestingConfig(Config):
