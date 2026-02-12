@@ -25,5 +25,5 @@ services:
 
 databases:
   - name: cash-flow-db
-    plan: starter  # Free tier
+    plan: free
     databaseName: cash_flow_intelligence
