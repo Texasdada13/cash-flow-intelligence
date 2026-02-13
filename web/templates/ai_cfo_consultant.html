@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% block title %}AI CFO Consultant - {{ app_name }}{% endblock %}
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-start mb-4">
+        <div>
+            <h2><i class="bi bi-robot me-2 text-success"></i>AI CFO Consultant</h2>
+            <p class="text-muted">Expert-level financial advice through conversational AI with 7 specialized modes</p>
+        </div>
+        <a href="/chat" class="btn btn-primary"><i class="bi bi-chat-dots me-2"></i>Start Conversation</a>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-2"><div class="card text-center p-3"><div class="metric-value" style="color:#198754;">7</div><div class="metric-label">Conversation Modes</div></div></div>
+        <div class="col-md-2"><div class="card text-center p-3"><div class="metric-value" style="color:#20c997;">24/7</div><div class="metric-label">Availability</div></div></div>
+        <div class="col-md-2"><div class="card text-center p-3"><div class="metric-value" style="color:#0dcaf0;">156</div><div class="metric-label">Queries Handled</div></div></div>
+        <div class="col-md-2"><div class="card text-center p-3"><div class="metric-value" style="color:#ffc107;">4.8</div><div class="metric-label">Avg Rating</div></div></div>
+        <div class="col-md-2"><div class="card text-center p-3"><div class="metric-value" style="color:#198754;">92%</div><div class="metric-label">Resolution Rate</div></div></div>
+        <div class="col-md-2"><div class="card text-center p-3"><div class="metric-value" style="color:#fd7e14;"><2s</div><div class="metric-label">Response Time</div></div></div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <div class="card mb-4">
+                <div class="card-header"><h5 class="mb-0">Conversation Modes</h5></div>
+                <div class="card-body" id="modes"></div>
+            </div>
+            <div class="card mb-4">
+                <div class="card-header"><h5 class="mb-0">Usage by Mode</h5></div>
+                <div class="card-body"><canvas id="modeChart" height="260"></canvas></div>
+            </div>
+            <div class="card">
+                <div class="card-header"><h5 class="mb-0">Sample AI Insights</h5></div>
+                <div class="card-body" id="insights"></div>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="card mb-4">
+                <div class="card-header"><h5 class="mb-0">Topic Distribution</h5></div>
+                <div class="card-body"><canvas id="topicChart" height="240"></canvas></div>
+            </div>
+            <div class="card mb-4">
+                <div class="card-header"><h5 class="mb-0">Usage Trend</h5></div>
+                <div class="card-body"><canvas id="usageChart" height="200"></canvas></div>
+            </div>
+            <div class="card">
+                <div class="card-header"><h5 class="mb-0"><i class="bi bi-lightbulb me-2 text-warning"></i>Popular Questions</h5></div>
+                <div class="card-body" id="questions"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+const MODES = [
+    {mode:'General Analysis',icon:'bi-chat-dots',desc:'Open-ended cash flow questions and strategic advice',queries:42,color:'#198754'},
+    {mode:'Cash Position Review',icon:'bi-cash-stack',desc:'Real-time cash balance analysis and liquidity assessment',queries:28,color:'#20c997'},
+    {mode:'Scenario Planning',icon:'bi-diagram-3',desc:'What-if analysis for business decisions and market changes',queries:24,color:'#0dcaf0'},
+    {mode:'Risk Assessment',icon:'bi-shield-check',desc:'Identify and evaluate cash flow risks and vulnerabilities',queries:22,color:'#ffc107'},
+    {mode:'Collections Strategy',icon:'bi-receipt',desc:'Optimize AR collections and reduce DSO',queries:18,color:'#fd7e14'},
+    {mode:'Vendor Negotiations',icon:'bi-handshake',desc:'Strategies for payment terms and vendor relationships',queries:14,color:'#6f42c1'},
+    {mode:'Board Preparation',icon:'bi-easel',desc:'Prepare financial narratives for board presentations',queries:8,color:'#dc3545'}
+];
+
+// Modes List
+document.getElementById('modes').innerHTML = MODES.map(m =>
+    `<div class="d-flex align-items-start gap-3 mb-3" style="padding:12px;border-radius:8px;background:rgba(255,255,255,0.03);">
+        <div style="width:44px;height:44px;border-radius:10px;background:${m.color}20;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="bi ${m.icon}" style="color:${m.color};font-size:1.2rem;"></i></div>
+        <div class="flex-grow-1"><strong>${m.mode}</strong><br><small class="text-muted">${m.desc}</small></div>
+        <span class="badge bg-secondary">${m.queries} queries</span>
+    </div>`
+).join('');
+
+// Mode Usage Chart
+new Chart(document.getElementById('modeChart'), {
+    type: 'bar',
+    data: {
+        labels: MODES.map(m => m.mode),
+        datasets: [{
+            label:'Queries',
+            data: MODES.map(m => m.queries),
+            backgroundColor: MODES.map(m => m.color + '99')
+        }]
+    },
+    options: {responsive:true, indexAxis:'y', scales:{x:{ticks:{color:'var(--muted-color)'},grid:{color:'rgba(255,255,255,0.05)'}},y:{ticks:{color:'var(--muted-color)',font:{size:10}},grid:{color:'rgba(255,255,255,0.1)'}}}, plugins:{legend:{display:false}}}
+});
+
+// Topic Distribution
+new Chart(document.getElementById('topicChart'), {
+    type: 'doughnut',
+    data: {
+        labels: ['Cash Management','Forecasting','Collections','Vendor Strategy','Risk Analysis','Board Prep'],
+        datasets: [{data:[32,24,18,12,10,4],backgroundColor:['#198754','#20c997','#ffc107','#0dcaf0','#fd7e14','#dc3545']}]
+    },
+    options: {responsive:true, plugins:{legend:{position:'bottom',labels:{color:'var(--muted-color)',font:{size:10}}}}}
+});
+
+// Usage Trend
+new Chart(document.getElementById('usageChart'), {
+    type: 'line',
+    data: {
+        labels: ['Sep','Oct','Nov','Dec','Jan','Feb'],
+        datasets: [{
+            label:'Conversations',
+            data:[12,18,24,32,38,42],
+            borderColor:'#198754',backgroundColor:'rgba(25,135,84,0.1)',fill:true,tension:0.3
+        }]
+    },
+    options: {responsive:true, scales:{y:{min:0,ticks:{color:'var(--muted-color)'},grid:{color:'rgba(255,255,255,0.1)'}},x:{ticks:{color:'var(--muted-color)'},grid:{color:'rgba(255,255,255,0.05)'}}}, plugins:{legend:{labels:{color:'var(--muted-color)'}}}}
+});
+
+// Sample Insights
+const INSIGHTS = [
+    {insight:'Your DSO of 42 days is 20% above industry median. Implementing early-pay discounts could recover $28K in cash flow.',category:'Collections',impact:'High'},
+    {insight:'Cash conversion cycle improved from 58 to 52 days over last quarter. Continue vendor term negotiations for further gains.',category:'Working Capital',impact:'Medium'},
+    {insight:'At current burn rate, cash runway extends to 18 months. Building a $100K reserve would provide additional 3-month buffer.',category:'Cash Position',impact:'High'},
+    {insight:'Q2 tax payment of $45K will temporarily reduce cash position. Consider drawing on credit line to maintain operational buffer.',category:'Planning',impact:'Medium'}
+];
+
+document.getElementById('insights').innerHTML = INSIGHTS.map(i => {
+    const color = i.impact==='High'?'#dc3545':'#ffc107';
+    return `<div style="padding:12px;border-radius:8px;background:rgba(255,255,255,0.03);margin-bottom:8px;border-left:3px solid ${color};">
+        <div class="d-flex justify-content-between mb-1"><small class="text-muted">${i.category}</small><span class="badge" style="background:${color};font-size:0.7rem;">${i.impact} Impact</span></div>
+        <span style="font-size:0.9rem;">${i.insight}</span>
+    </div>`;
+}).join('');
+
+// Popular Questions
+const QUESTIONS = [
+    'What is my current cash runway?',
+    'How can I reduce my DSO?',
+    'Should I take on a line of credit?',
+    'What are my biggest cash flow risks?',
+    'How do I optimize vendor payment terms?',
+    'What should I present to the board?'
+];
+document.getElementById('questions').innerHTML = QUESTIONS.map(q =>
+    `<div class="d-flex align-items-center gap-2 mb-2"><i class="bi bi-chat-left-text text-success"></i><span style="font-size:0.9rem;">${q}</span></div>`
+).join('');
+</script>
+{% endblock %}

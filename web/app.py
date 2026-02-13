@@ -95,6 +95,16 @@ def create_app(config_class=None):
                              periods=periods,
                              forecast=forecast)
 
+    @app.route('/cash-flow-assessment')
+    def cash_flow_assessment():
+        """Cash Flow Assessment showcase page"""
+        return render_template('cash_flow_assessment.html', app_name=app.config['APP_NAME'])
+
+    @app.route('/ai-cfo-consultant')
+    def ai_cfo_consultant():
+        """AI CFO Consultant showcase page"""
+        return render_template('ai_cfo_consultant.html', app_name=app.config['APP_NAME'])
+
     @app.route('/cash-flow-forecasting')
     def cash_flow_forecasting():
         """Cash Flow Forecasting page"""
@@ -104,6 +114,16 @@ def create_app(config_class=None):
     def industry_benchmarks():
         """Industry Benchmarks page"""
         return render_template('industry_benchmarks.html', app_name=app.config['APP_NAME'])
+
+    @app.route('/framework-generator')
+    def framework_generator():
+        """Framework Generator showcase page"""
+        return render_template('framework_generator.html', app_name=app.config['APP_NAME'])
+
+    @app.route('/report-generator')
+    def report_generator():
+        """Report Generator showcase page"""
+        return render_template('report_generator.html', app_name=app.config['APP_NAME'])
 
     @app.route('/chat')
     @app.route('/chat/<company_id>')

@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+{% block title %}Framework Generator - {{ app_name }}{% endblock %}
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-start mb-4">
+        <div>
+            <h2><i class="bi bi-file-earmark-text me-2 text-success"></i>Framework Generator</h2>
+            <p class="text-muted">Generate customized cash management frameworks and policies tailored to your business</p>
+        </div>
+        <a href="/frameworks" class="btn btn-primary"><i class="bi bi-plus-circle me-2"></i>Generate Framework</a>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-3"><div class="card text-center p-3"><div class="metric-value" style="color:#198754;">4</div><div class="metric-label">Framework Types</div></div></div>
+        <div class="col-md-3"><div class="card text-center p-3"><div class="metric-value" style="color:#20c997;">12</div><div class="metric-label">Generated</div></div></div>
+        <div class="col-md-3"><div class="card text-center p-3"><div class="metric-value" style="color:#0dcaf0;">6</div><div class="metric-label">Sections Each</div></div></div>
+        <div class="col-md-3"><div class="card text-center p-3"><div class="metric-value" style="color:#ffc107;">AI</div><div class="metric-label">Powered</div></div></div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <div class="card mb-4">
+                <div class="card-header"><h5 class="mb-0">Available Framework Types</h5></div>
+                <div class="card-body" id="frameworkTypes"></div>
+            </div>
+            <div class="card mb-4">
+                <div class="card-header"><h5 class="mb-0">Generation by Type</h5></div>
+                <div class="card-body"><canvas id="typeChart" height="220"></canvas></div>
+            </div>
+            <div class="card">
+                <div class="card-header"><h5 class="mb-0">Sample Framework: Cash Management Policy</h5></div>
+                <div class="card-body" id="sampleFramework"></div>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="card mb-4">
+                <div class="card-header"><h5 class="mb-0">Framework Coverage</h5></div>
+                <div class="card-body"><canvas id="coverageChart" height="240"></canvas></div>
+            </div>
+            <div class="card mb-4">
+                <div class="card-header"><h5 class="mb-0">Generation Trend</h5></div>
+                <div class="card-body"><canvas id="trendChart" height="200"></canvas></div>
+            </div>
+            <div class="card">
+                <div class="card-header"><h5 class="mb-0"><i class="bi bi-list-check me-2 text-success"></i>Recently Generated</h5></div>
+                <div class="card-body" id="recentFrameworks"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+const FRAMEWORKS = [
+    {type:'Cash Management Policy',icon:'bi-cash-stack',desc:'Comprehensive policy for managing cash flows, reserves, and liquidity',sections:['Cash Reserve Requirements','Cash Flow Monitoring','Investment Guidelines','Emergency Protocols','Reporting Requirements','Compliance Standards'],generated:5,color:'#198754'},
+    {type:'Credit & Collections Policy',icon:'bi-receipt-cutoff',desc:'Guidelines for extending credit and collecting receivables efficiently',sections:['Credit Evaluation Criteria','Credit Limits','Payment Terms','Collection Process','Escalation Procedures','Write-off Policy'],generated:3,color:'#20c997'},
+    {type:'Working Capital Strategy',icon:'bi-graph-up',desc:'Strategic approach to optimizing working capital components',sections:['Current State Analysis','Target Metrics','Inventory Optimization','Receivables Management','Payables Strategy','Implementation Plan'],generated:2,color:'#0dcaf0'},
+    {type:'KPI Dashboard Design',icon:'bi-speedometer2',desc:'Key performance indicators for monitoring cash flow health',sections:['Executive Summary KPIs','Liquidity Metrics','Efficiency Metrics','Trend Indicators','Alert Thresholds','Reporting Cadence'],generated:2,color:'#ffc107'}
+];
+
+// Framework Types List
+document.getElementById('frameworkTypes').innerHTML = FRAMEWORKS.map(f =>
+    `<div style="padding:14px;border-radius:10px;background:rgba(255,255,255,0.03);margin-bottom:10px;border-left:3px solid ${f.color};">
+        <div class="d-flex align-items-start gap-3">
+            <div style="width:48px;height:48px;border-radius:10px;background:${f.color}20;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="bi ${f.icon}" style="color:${f.color};font-size:1.3rem;"></i></div>
+            <div class="flex-grow-1">
+                <div class="d-flex justify-content-between"><strong>${f.type}</strong><span class="badge bg-secondary">${f.generated} generated</span></div>
+                <small class="text-muted">${f.desc}</small>
+                <div class="mt-2 d-flex flex-wrap gap-1">${f.sections.map(s => `<span class="badge" style="background:rgba(255,255,255,0.1);font-size:0.65rem;">${s}</span>`).join('')}</div>
+            </div>
+        </div>
+    </div>`
+).join('');
+
+// Generation by Type
+new Chart(document.getElementById('typeChart'), {
+    type: 'bar',
+    data: {
+        labels: FRAMEWORKS.map(f => f.type),
+        datasets: [{label:'Generated',data:FRAMEWORKS.map(f=>f.generated),backgroundColor:FRAMEWORKS.map(f=>f.color+'99')}]
+    },
+    options: {responsive:true, indexAxis:'y', scales:{x:{ticks:{color:'var(--muted-color)'},grid:{color:'rgba(255,255,255,0.05)'}},y:{ticks:{color:'var(--muted-color)',font:{size:10}},grid:{color:'rgba(255,255,255,0.1)'}}}, plugins:{legend:{display:false}}}
+});
+
+// Coverage Radar
+new Chart(document.getElementById('coverageChart'), {
+    type: 'radar',
+    data: {
+        labels: ['Cash Mgmt','Credit Policy','Collections','Working Capital','KPI Design','Compliance'],
+        datasets: [
+            {label:'Coverage',data:[92,78,85,68,82,75],backgroundColor:'rgba(25,135,84,0.2)',borderColor:'#198754',pointBackgroundColor:'#198754'},
+            {label:'Best Practice',data:[95,90,92,88,90,85],backgroundColor:'rgba(13,202,240,0.05)',borderColor:'#0dcaf0',borderDash:[3,3],pointBackgroundColor:'#0dcaf0'}
+        ]
+    },
+    options: {responsive:true, scales:{r:{beginAtZero:true,max:100,grid:{color:'rgba(255,255,255,0.1)'},pointLabels:{color:'var(--muted-color)',font:{size:10}},ticks:{display:false}}}, plugins:{legend:{position:'bottom',labels:{color:'var(--muted-color)'}}}}
+});
+
+// Trend
+new Chart(document.getElementById('trendChart'), {
+    type: 'line',
+    data: {
+        labels: ['Sep','Oct','Nov','Dec','Jan','Feb'],
+        datasets: [{label:'Frameworks Generated',data:[1,1,2,3,2,3],borderColor:'#198754',backgroundColor:'rgba(25,135,84,0.1)',fill:true,tension:0.3}]
+    },
+    options: {responsive:true, scales:{y:{min:0,ticks:{color:'var(--muted-color)',stepSize:1},grid:{color:'rgba(255,255,255,0.1)'}},x:{ticks:{color:'var(--muted-color)'},grid:{color:'rgba(255,255,255,0.05)'}}}, plugins:{legend:{labels:{color:'var(--muted-color)'}}}}
+});
+
+// Sample Framework
+const SECTIONS = [
+    {title:'1. Cash Reserve Requirements',content:'Maintain minimum cash reserve equal to 60 days of operating expenses ($340K). Emergency fund of $100K held in separate high-yield savings. Weekly monitoring with automated alerts at 75% and 50% thresholds.'},
+    {title:'2. Cash Flow Monitoring',content:'Daily cash position tracking across all accounts. Weekly 13-week rolling forecast updates. Monthly variance analysis vs. budget with root cause documentation. Quarterly board reporting package.'},
+    {title:'3. Investment Guidelines',content:'Excess cash above $500K threshold invested in T-bills or money market funds. Maximum maturity of 90 days for any single instrument. Diversification across at least 2 institutions. Expected yield: 4.5-5.2% APY.'},
+    {title:'4. Emergency Protocols',content:'Cash below 45-day threshold triggers hiring freeze. Below 30-day threshold triggers discretionary spending freeze. Below 15-day threshold triggers emergency board notification and credit line draw. CEO and CFO dual authorization for emergency expenditures.'},
+    {title:'5. Reporting Requirements',content:'Daily: Cash position dashboard. Weekly: 13-week forecast, AR/AP aging. Monthly: Full cash flow statement, variance analysis, KPI scorecard. Quarterly: Board presentation with trends and projections.'},
+    {title:'6. Compliance Standards',content:'SOX-compliant cash controls for publicly traded entities. Segregation of duties for cash receipts and disbursements. Annual audit of cash management procedures. Documentation retention per industry regulations.'}
+];
+
+document.getElementById('sampleFramework').innerHTML = SECTIONS.map(s =>
+    `<div style="padding:12px;border-radius:8px;background:rgba(255,255,255,0.03);margin-bottom:8px;">
+        <strong style="color:#20c997;">${s.title}</strong>
+        <p class="text-muted mb-0 mt-1" style="font-size:0.85rem;">${s.content}</p>
+    </div>`
+).join('');
+
+// Recent Frameworks
+const RECENT = [
+    {title:'Cash Management Policy',date:'Feb 10, 2026',industry:'Technology'},
+    {title:'Credit & Collections Policy',date:'Feb 5, 2026',industry:'Professional Services'},
+    {title:'Working Capital Strategy',date:'Jan 28, 2026',industry:'Manufacturing'},
+    {title:'KPI Dashboard Design',date:'Jan 22, 2026',industry:'Healthcare'},
+    {title:'Cash Management Policy',date:'Jan 15, 2026',industry:'Retail'}
+];
+document.getElementById('recentFrameworks').innerHTML = RECENT.map(r =>
+    `<div class="d-flex justify-content-between align-items-center mb-2" style="padding:8px 12px;border-radius:6px;background:rgba(255,255,255,0.03);">
+        <div><strong style="font-size:0.85rem;">${r.title}</strong><br><small class="text-muted">${r.industry}</small></div>
+        <small class="text-muted">${r.date}</small>
+    </div>`
+).join('');
+</script>
+{% endblock %}

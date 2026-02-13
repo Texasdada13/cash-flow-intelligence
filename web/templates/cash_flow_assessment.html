@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+{% block title %}Cash Flow Assessment - {{ app_name }}{% endblock %}
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-start mb-4">
+        <div>
+            <h2><i class="bi bi-clipboard-check me-2 text-success"></i>Cash Flow Health Assessment</h2>
+            <p class="text-muted">Comprehensive evaluation across 5 key dimensions with actionable improvement plans</p>
+        </div>
+        <a href="/assessment" class="btn btn-primary"><i class="bi bi-play-circle me-2"></i>Take Assessment</a>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-2"><div class="card text-center p-3"><div class="metric-value" style="color:#198754;">74</div><div class="metric-label">Health Score</div></div></div>
+        <div class="col-md-2"><div class="card text-center p-3"><div class="metric-value" style="color:#20c997;">B+</div><div class="metric-label">Overall Grade</div></div></div>
+        <div class="col-md-2"><div class="card text-center p-3"><div class="metric-value" style="color:#ffc107;">Medium</div><div class="metric-label">Risk Level</div></div></div>
+        <div class="col-md-2"><div class="card text-center p-3"><div class="metric-value" style="color:#0dcaf0;">40</div><div class="metric-label">Questions</div></div></div>
+        <div class="col-md-2"><div class="card text-center p-3"><div class="metric-value" style="color:#198754;">5</div><div class="metric-label">Dimensions</div></div></div>
+        <div class="col-md-2"><div class="card text-center p-3"><div class="metric-value" style="color:#fd7e14;">8</div><div class="metric-label">Recommendations</div></div></div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <div class="card mb-4">
+                <div class="card-header"><h5 class="mb-0">Dimension Scores</h5></div>
+                <div class="card-body"><canvas id="radarChart" height="320"></canvas></div>
+            </div>
+            <div class="card mb-4">
+                <div class="card-header"><h5 class="mb-0">Score Breakdown by Dimension</h5></div>
+                <div class="card-body"><canvas id="dimensionBarChart" height="220"></canvas></div>
+            </div>
+            <div class="card">
+                <div class="card-header"><h5 class="mb-0">Assessment Details</h5></div>
+                <div class="card-body" id="assessmentDetails"></div>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="card mb-4">
+                <div class="card-header"><h5 class="mb-0">Score Distribution</h5></div>
+                <div class="card-body"><canvas id="scoreDonut" height="220"></canvas></div>
+            </div>
+            <div class="card mb-4">
+                <div class="card-header"><h5 class="mb-0">Score Trend</h5></div>
+                <div class="card-body"><canvas id="trendChart" height="200"></canvas></div>
+            </div>
+            <div class="card mb-4">
+                <div class="card-header"><h5 class="mb-0"><i class="bi bi-check-circle me-2 text-success"></i>Strengths</h5></div>
+                <div class="card-body" id="strengths"></div>
+            </div>
+            <div class="card">
+                <div class="card-header"><h5 class="mb-0"><i class="bi bi-exclamation-triangle me-2 text-warning"></i>Improvement Areas</h5></div>
+                <div class="card-body" id="gaps"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+const DIMS = [
+    {name:'Cash Visibility',score:82,grade:'A-',questions:8,color:'#198754'},
+    {name:'Receivables Mgmt',score:68,grade:'B-',questions:8,color:'#ffc107'},
+    {name:'Payables Mgmt',score:71,grade:'B',questions:8,color:'#20c997'},
+    {name:'Working Capital',score:65,grade:'C+',questions:8,color:'#fd7e14'},
+    {name:'Financial Planning',score:84,grade:'A',questions:8,color:'#0dcaf0'}
+];
+
+// Radar Chart
+new Chart(document.getElementById('radarChart'), {
+    type: 'radar',
+    data: {
+        labels: DIMS.map(d => d.name),
+        datasets: [
+            {label:'Your Score',data:DIMS.map(d=>d.score),backgroundColor:'rgba(25,135,84,0.2)',borderColor:'#198754',pointBackgroundColor:'#198754',borderWidth:2},
+            {label:'Industry Average',data:[70,72,68,66,72],backgroundColor:'rgba(108,117,125,0.1)',borderColor:'#6c757d',borderDash:[5,5],pointBackgroundColor:'#6c757d'},
+            {label:'Best Practice',data:[90,88,85,82,92],backgroundColor:'rgba(13,202,240,0.05)',borderColor:'#0dcaf0',borderDash:[3,3],pointBackgroundColor:'#0dcaf0'}
+        ]
+    },
+    options: {responsive:true, scales:{r:{beginAtZero:true,max:100,grid:{color:'rgba(255,255,255,0.1)'},pointLabels:{color:'var(--muted-color)',font:{size:11}},ticks:{display:false}}}, plugins:{legend:{position:'bottom',labels:{color:'var(--muted-color)'}}}}
+});
+
+// Dimension Bar Chart
+new Chart(document.getElementById('dimensionBarChart'), {
+    type: 'bar',
+    data: {
+        labels: DIMS.map(d => d.name),
+        datasets: [{
+            label:'Score',
+            data: DIMS.map(d => d.score),
+            backgroundColor: DIMS.map(d => d.score >= 80 ? '#198754' : d.score >= 70 ? '#ffc107' : '#fd7e14')
+        }]
+    },
+    options: {responsive:true, indexAxis:'y', scales:{x:{min:0,max:100,ticks:{color:'var(--muted-color)'},grid:{color:'rgba(255,255,255,0.05)'}},y:{ticks:{color:'var(--muted-color)'},grid:{color:'rgba(255,255,255,0.1)'}}}, plugins:{legend:{display:false}}}
+});
+
+// Score Distribution Donut
+new Chart(document.getElementById('scoreDonut'), {
+    type: 'doughnut',
+    data: {
+        labels: ['Excellent (80+)','Good (70-79)','Needs Work (<70)'],
+        datasets: [{data:[2,1,2],backgroundColor:['#198754','#ffc107','#fd7e14']}]
+    },
+    options: {responsive:true, plugins:{legend:{position:'bottom',labels:{color:'var(--muted-color)',font:{size:11}}}}}
+});
+
+// Score Trend
+new Chart(document.getElementById('trendChart'), {
+    type: 'line',
+    data: {
+        labels: ['Q1 2025','Q2 2025','Q3 2025','Q4 2025','Q1 2026'],
+        datasets: [{
+            label:'Health Score',
+            data:[58,63,68,71,74],
+            borderColor:'#198754',backgroundColor:'rgba(25,135,84,0.1)',fill:true,tension:0.3
+        }]
+    },
+    options: {responsive:true, scales:{y:{min:0,max:100,ticks:{color:'var(--muted-color)'},grid:{color:'rgba(255,255,255,0.1)'}},x:{ticks:{color:'var(--muted-color)'},grid:{color:'rgba(255,255,255,0.05)'}}}, plugins:{legend:{labels:{color:'var(--muted-color)'}}}}
+});
+
+// Assessment Details
+document.getElementById('assessmentDetails').innerHTML = DIMS.map(d => {
+    const barColor = d.score >= 80 ? '#198754' : d.score >= 70 ? '#ffc107' : '#fd7e14';
+    return `<div style="padding:12px 14px;border-radius:8px;background:rgba(255,255,255,0.03);margin-bottom:8px;">
+        <div class="d-flex justify-content-between mb-1"><strong>${d.name}</strong><span style="color:${barColor};font-weight:700;">${d.score}/100 (${d.grade})</span></div>
+        <div class="d-flex justify-content-between mb-2"><small class="text-muted">${d.questions} questions evaluated</small></div>
+        <div style="height:8px;border-radius:4px;background:rgba(255,255,255,0.1);overflow:hidden;"><div style="height:100%;width:${d.score}%;background:${barColor};border-radius:4px;"></div></div>
+    </div>`;
+}).join('');
+
+// Strengths
+const STRENGTHS = [
+    'Strong financial planning processes with regular forecasting',
+    'Good cash visibility with daily position monitoring',
+    'Effective payables management with vendor term optimization',
+    'Board-level financial reporting is well-structured'
+];
+document.getElementById('strengths').innerHTML = STRENGTHS.map(s =>
+    `<div class="d-flex align-items-start gap-2 mb-2"><i class="bi bi-check-circle-fill text-success" style="margin-top:2px;"></i><span style="font-size:0.9rem;">${s}</span></div>`
+).join('');
+
+// Gaps
+const GAPS = [
+    {gap:'Working capital optimization needs improvement',priority:'High',action:'Implement cash conversion cycle tracking'},
+    {gap:'AR aging exceeds 90-day threshold for 8% of invoices',priority:'High',action:'Deploy automated collection reminders'},
+    {gap:'No formal credit policy for new customers',priority:'Medium',action:'Create credit evaluation framework'},
+    {gap:'Cash reserves below 60-day target',priority:'Medium',action:'Build emergency fund to 60-day minimum'},
+    {gap:'Manual reconciliation processes slow reporting',priority:'Low',action:'Evaluate automated reconciliation tools'}
+];
+document.getElementById('gaps').innerHTML = GAPS.map(g => {
+    const color = g.priority==='High'?'#dc3545':g.priority==='Medium'?'#ffc107':'#198754';
+    return `<div class="d-flex align-items-start gap-2 mb-3"><span class="badge" style="background:${color};min-width:50px;font-size:0.7rem;">${g.priority}</span><div><strong>${g.gap}</strong><br><small class="text-muted">${g.action}</small></div></div>`;
+}).join('');
+</script>
+{% endblock %}
