@@ -30,153 +30,36 @@
 
     <!-- Feature Cards Grid -->
     <div class="row g-4 mt-4" id="features">
-        <!-- Card 1: Assessment -->
+        {% for icon, title, desc, features, url, btn_text in [
+            ('bi-clipboard-check', 'Cash Flow Assessment', 'Comprehensive evaluation of your cash management practices across 5 key dimensions: visibility, receivables, payables, working capital, and financial planning.', ['40+ diagnostic questions', 'Health score calculation', 'Gap analysis & priorities'], '/assessment', 'Start Assessment'),
+            ('bi-robot', 'AI CFO Consultant', 'Get instant, expert-level financial advice through our conversational AI. Ask questions about your cash position, get recommendations, and explore scenarios.', ['Context-aware responses', '7 conversation modes', 'Actionable recommendations'], '/chat', 'Start Conversation'),
+            ('bi-graph-up-arrow', 'Cash Flow Forecasting', 'Predict your cash position with AI-powered time series analysis. Plan ahead with multiple scenario projections and runway calculations.', ['6-12 month projections', 'Multi-scenario analysis', 'Cash runway alerts'], '/cash-flow-forecasting', 'View Forecasts'),
+            ('bi-bar-chart-line', 'Industry Benchmarks', 'Compare your cash flow metrics against industry peers. Identify performance gaps and set realistic improvement targets based on best practices.', ['10+ KPI comparisons', 'Industry-specific benchmarks', 'Percentile rankings'], '/industry-benchmarks', 'View Benchmarks'),
+            ('bi-file-earmark-text', 'Framework Generator', 'Generate customized cash management frameworks and policies tailored to your business. From credit policies to working capital strategies.', ['Cash management policies', 'Credit & collections', 'Working capital strategy'], '/frameworks', 'Generate Framework'),
+            ('bi-file-earmark-pdf', 'Report Generator', 'Create professional cash flow reports for stakeholders. Board presentations, investor updates, banker communications, and internal reviews.', ['Executive summaries', 'Board presentations', 'Lender packages'], '/reports', 'Generate Report')
+        ] %}
         <div class="col-md-6 col-lg-4">
-            <div class="card feature-card h-100 border-0 shadow-sm">
-                <div class="card-body p-4">
-                    <div class="feature-icon mb-3">
-                        <i class="bi bi-clipboard-check"></i>
+            <a href="{{ url }}" class="text-decoration-none">
+                <div class="card feature-card h-100 border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="feature-icon mb-3">
+                            <i class="bi {{ icon }}"></i>
+                        </div>
+                        <h4 class="card-title mb-3">{{ title }}</h4>
+                        <p class="card-text text-muted mb-4">{{ desc }}</p>
+                        <ul class="list-unstyled small text-muted mb-4">
+                            {% for feat in features %}
+                            <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>{{ feat }}</li>
+                            {% endfor %}
+                        </ul>
+                        <span class="btn btn-outline-primary w-100">
+                            <i class="bi bi-arrow-right me-2"></i>{{ btn_text }}
+                        </span>
                     </div>
-                    <h4 class="card-title mb-3">Cash Flow Assessment</h4>
-                    <p class="card-text text-muted mb-4">
-                        Comprehensive evaluation of your cash management practices across
-                        5 key dimensions: visibility, receivables, payables, working capital,
-                        and financial planning.
-                    </p>
-                    <ul class="list-unstyled small text-muted mb-4">
-                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>40+ diagnostic questions</li>
-                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Health score calculation</li>
-                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Gap analysis & priorities</li>
-                    </ul>
-                    <a href="/assessment" class="btn btn-outline-primary w-100">
-                        <i class="bi bi-arrow-right me-2"></i>Start Assessment
-                    </a>
                 </div>
-            </div>
+            </a>
         </div>
-
-        <!-- Card 2: AI CFO Consultant -->
-        <div class="col-md-6 col-lg-4">
-            <div class="card feature-card h-100 border-0 shadow-sm">
-                <div class="card-body p-4">
-                    <div class="feature-icon mb-3">
-                        <i class="bi bi-robot"></i>
-                    </div>
-                    <h4 class="card-title mb-3">AI CFO Consultant</h4>
-                    <p class="card-text text-muted mb-4">
-                        Get instant, expert-level financial advice through our conversational
-                        AI. Ask questions about your cash position, get recommendations, and
-                        explore scenarios.
-                    </p>
-                    <ul class="list-unstyled small text-muted mb-4">
-                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Context-aware responses</li>
-                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>7 conversation modes</li>
-                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Actionable recommendations</li>
-                    </ul>
-                    <a href="/chat" class="btn btn-outline-primary w-100">
-                        <i class="bi bi-arrow-right me-2"></i>Start Conversation
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Card 3: Cash Flow Forecasting -->
-        <div class="col-md-6 col-lg-4">
-            <div class="card feature-card h-100 border-0 shadow-sm">
-                <div class="card-body p-4">
-                    <div class="feature-icon mb-3">
-                        <i class="bi bi-graph-up-arrow"></i>
-                    </div>
-                    <h4 class="card-title mb-3">Cash Flow Forecasting</h4>
-                    <p class="card-text text-muted mb-4">
-                        Predict your cash position with AI-powered time series analysis.
-                        Plan ahead with multiple scenario projections and runway calculations.
-                    </p>
-                    <ul class="list-unstyled small text-muted mb-4">
-                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>6-12 month projections</li>
-                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Multi-scenario analysis</li>
-                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Cash runway alerts</li>
-                    </ul>
-                    <a href="/dashboard" class="btn btn-outline-primary w-100">
-                        <i class="bi bi-arrow-right me-2"></i>View Forecasts
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Card 4: Industry Benchmarks -->
-        <div class="col-md-6 col-lg-4">
-            <div class="card feature-card h-100 border-0 shadow-sm">
-                <div class="card-body p-4">
-                    <div class="feature-icon mb-3">
-                        <i class="bi bi-bar-chart-line"></i>
-                    </div>
-                    <h4 class="card-title mb-3">Industry Benchmarks</h4>
-                    <p class="card-text text-muted mb-4">
-                        Compare your cash flow metrics against industry peers. Identify
-                        performance gaps and set realistic improvement targets based on
-                        best practices.
-                    </p>
-                    <ul class="list-unstyled small text-muted mb-4">
-                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>10+ KPI comparisons</li>
-                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Industry-specific benchmarks</li>
-                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Percentile rankings</li>
-                    </ul>
-                    <a href="/dashboard" class="btn btn-outline-primary w-100">
-                        <i class="bi bi-arrow-right me-2"></i>View Benchmarks
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Card 5: Framework Generator -->
-        <div class="col-md-6 col-lg-4">
-            <div class="card feature-card h-100 border-0 shadow-sm">
-                <div class="card-body p-4">
-                    <div class="feature-icon mb-3">
-                        <i class="bi bi-file-earmark-text"></i>
-                    </div>
-                    <h4 class="card-title mb-3">Framework Generator</h4>
-                    <p class="card-text text-muted mb-4">
-                        Generate customized cash management frameworks and policies tailored
-                        to your business. From credit policies to working capital strategies.
-                    </p>
-                    <ul class="list-unstyled small text-muted mb-4">
-                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Cash management policies</li>
-                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Credit & collections</li>
-                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Working capital strategy</li>
-                    </ul>
-                    <a href="/frameworks" class="btn btn-outline-primary w-100">
-                        <i class="bi bi-arrow-right me-2"></i>Generate Framework
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Card 6: Report Generator -->
-        <div class="col-md-6 col-lg-4">
-            <div class="card feature-card h-100 border-0 shadow-sm">
-                <div class="card-body p-4">
-                    <div class="feature-icon mb-3">
-                        <i class="bi bi-file-earmark-pdf"></i>
-                    </div>
-                    <h4 class="card-title mb-3">Report Generator</h4>
-                    <p class="card-text text-muted mb-4">
-                        Create professional cash flow reports for stakeholders. Board
-                        presentations, investor updates, banker communications, and
-                        internal reviews.
-                    </p>
-                    <ul class="list-unstyled small text-muted mb-4">
-                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Executive summaries</li>
-                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Board presentations</li>
-                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Lender packages</li>
-                    </ul>
-                    <a href="/reports" class="btn btn-outline-primary w-100">
-                        <i class="bi bi-arrow-right me-2"></i>Generate Report
-                    </a>
-                </div>
-            </div>
-        </div>
+        {% endfor %}
     </div>
 
     <!-- Key Metrics Highlight -->

@@ -95,6 +95,16 @@ def create_app(config_class=None):
                              periods=periods,
                              forecast=forecast)
 
+    @app.route('/cash-flow-forecasting')
+    def cash_flow_forecasting():
+        """Cash Flow Forecasting page"""
+        return render_template('cash_flow_forecasting.html', app_name=app.config['APP_NAME'])
+
+    @app.route('/industry-benchmarks')
+    def industry_benchmarks():
+        """Industry Benchmarks page"""
+        return render_template('industry_benchmarks.html', app_name=app.config['APP_NAME'])
+
     @app.route('/chat')
     @app.route('/chat/<company_id>')
     def chat(company_id=None):

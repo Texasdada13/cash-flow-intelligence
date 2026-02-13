@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+{% block title %}Cash Flow Forecasting - {{ app_name }}{% endblock %}
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-start mb-4">
+        <div>
+            <h2><i class="bi bi-graph-up-arrow me-2 text-success"></i>Cash Flow Forecasting</h2>
+            <p class="text-muted">AI-powered projections with multi-scenario analysis and cash runway calculations</p>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-2"><div class="card text-center p-3"><div class="metric-value">$842K</div><div class="metric-label">Current Cash</div></div></div>
+        <div class="col-md-2"><div class="card text-center p-3"><div class="metric-value" style="color:#20c997;">$1.1M</div><div class="metric-label">Projected (6mo)</div></div></div>
+        <div class="col-md-2"><div class="card text-center p-3"><div class="metric-value" style="color:#198754;">18 mo</div><div class="metric-label">Cash Runway</div></div></div>
+        <div class="col-md-2"><div class="card text-center p-3"><div class="metric-value" style="color:#0dcaf0;">87%</div><div class="metric-label">Confidence</div></div></div>
+        <div class="col-md-2"><div class="card text-center p-3"><div class="metric-value" style="color:#ffc107;">$68K</div><div class="metric-label">Monthly Burn</div></div></div>
+        <div class="col-md-2"><div class="card text-center p-3"><div class="metric-value" style="color:#198754;">+12%</div><div class="metric-label">Revenue Trend</div></div></div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header"><h5 class="mb-0"><i class="bi bi-graph-up-arrow me-2 text-success"></i>Cash Position Forecast</h5></div>
+                <div class="card-body"><canvas id="forecastChart" height="300"></canvas></div>
+            </div>
+            <div class="card mb-4">
+                <div class="card-header"><h5 class="mb-0">Monthly Cash Flow Breakdown</h5></div>
+                <div class="card-body"><canvas id="breakdownChart" height="260"></canvas></div>
+            </div>
+            <div class="card">
+                <div class="card-header"><h5 class="mb-0">Forecast Details</h5></div>
+                <div class="card-body" id="forecastTable"></div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card mb-4">
+                <div class="card-header"><h5 class="mb-0">Scenario Comparison</h5></div>
+                <div class="card-body"><canvas id="scenarioChart" height="240"></canvas></div>
+            </div>
+            <div class="card mb-4">
+                <div class="card-header"><h5 class="mb-0">Cash Inflows vs Outflows</h5></div>
+                <div class="card-body"><canvas id="inflowOutflowChart" height="220"></canvas></div>
+            </div>
+            <div class="card mb-4">
+                <div class="card-header"><h5 class="mb-0"><i class="bi bi-exclamation-triangle me-2 text-warning"></i>Runway Alerts</h5></div>
+                <div class="card-body" id="alerts"></div>
+            </div>
+            <div class="card">
+                <div class="card-header"><h5 class="mb-0"><i class="bi bi-lightbulb me-2 text-success"></i>Recommendations</h5></div>
+                <div class="card-body" id="recommendations"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+const MONTHS = ['Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb'];
+const HIST = [680,710,725,748,762,790,810,825,838,842];
+const BASE = [842,858,876,905,940,980,1020,1060,1080,1100,1120,1145];
+const OPT = [842,870,910,960,1020,1080,1150,1230,1280,1340,1400,1470];
+const PESS = [842,830,820,815,810,808,810,815,820,825,830,840];
+
+// Cash Position Forecast
+new Chart(document.getElementById('forecastChart'), {
+    type: 'line',
+    data: {
+        labels: MONTHS,
+        datasets: [
+            {label:'Actual',data:[...HIST,null,null],borderColor:'#198754',backgroundColor:'rgba(25,135,84,0.1)',fill:true,tension:0.3,borderWidth:3,pointRadius:4},
+            {label:'Base Case',data:[null,null,null,null,null,null,null,null,null,...BASE.slice(0,3)],borderColor:'#20c997',tension:0.3,borderWidth:2},
+            {label:'Optimistic',data:[null,null,null,null,null,null,null,null,null,...OPT.slice(0,3)],borderColor:'#0dcaf0',borderDash:[5,5],tension:0.3},
+            {label:'Conservative',data:[null,null,null,null,null,null,null,null,null,...PESS.slice(0,3)],borderColor:'#ffc107',borderDash:[3,3],tension:0.3}
+        ]
+    },
+    options: {responsive:true, scales:{y:{ticks:{color:'var(--muted-color)',callback:v=>'$'+v+'K'},grid:{color:'rgba(255,255,255,0.1)'}},x:{ticks:{color:'var(--muted-color)'},grid:{color:'rgba(255,255,255,0.05)'}}}, plugins:{legend:{position:'bottom',labels:{color:'var(--muted-color)'}}}}
+});
+
+// Monthly Cash Flow Breakdown
+new Chart(document.getElementById('breakdownChart'), {
+    type: 'bar',
+    data: {
+        labels: ['Sep','Oct','Nov','Dec','Jan','Feb','Mar','Apr','May','Jun'],
+        datasets: [
+            {label:'Inflows',data:[185,192,198,210,218,225,232,240,248,255],backgroundColor:'rgba(25,135,84,0.6)'},
+            {label:'Outflows',data:[-155,-158,-162,-168,-170,-172,-175,-178,-180,-182],backgroundColor:'rgba(220,53,69,0.5)'},
+            {label:'Net',data:[30,34,36,42,48,53,57,62,68,73],type:'line',borderColor:'#0dcaf0',tension:0.3,fill:false,yAxisID:'y'}
+        ]
+    },
+    options: {responsive:true, scales:{y:{ticks:{color:'var(--muted-color)',callback:v=>'$'+v+'K'},grid:{color:'rgba(255,255,255,0.1)'}},x:{ticks:{color:'var(--muted-color)'},grid:{color:'rgba(255,255,255,0.05)'}}}, plugins:{legend:{position:'bottom',labels:{color:'var(--muted-color)'}}}}
+});
+
+// Scenario Comparison (ending cash at 6 months)
+new Chart(document.getElementById('scenarioChart'), {
+    type: 'bar',
+    data: {
+        labels: ['Conservative','Base Case','Optimistic'],
+        datasets: [{
+            label:'Projected Cash (6mo)',
+            data:[808,980,1080],
+            backgroundColor:['rgba(255,193,7,0.6)','rgba(25,135,84,0.6)','rgba(13,202,240,0.6)']
+        }]
+    },
+    options: {responsive:true, indexAxis:'y', scales:{x:{ticks:{color:'var(--muted-color)',callback:v=>'$'+v+'K'},grid:{color:'rgba(255,255,255,0.05)'}},y:{ticks:{color:'var(--muted-color)'},grid:{color:'rgba(255,255,255,0.1)'}}}, plugins:{legend:{display:false}}}
+});
+
+// Inflows vs Outflows Pie
+new Chart(document.getElementById('inflowOutflowChart'), {
+    type: 'doughnut',
+    data: {
+        labels: ['Revenue','Other Income','Operating Expenses','Payroll','Rent','Other Costs'],
+        datasets: [{data:[68,7,12,42,8,10],backgroundColor:['#198754','#20c997','#dc3545','#fd7e14','#ffc107','#6c757d']}]
+    },
+    options: {responsive:true, plugins:{legend:{position:'bottom',labels:{color:'var(--muted-color)',font:{size:10}}}}}
+});
+
+// Forecast Table
+const FORECAST = [
+    {month:'Jan 2026',inflow:218,outflow:170,net:48,balance:890,runway:'18 mo'},
+    {month:'Feb 2026',inflow:225,outflow:172,net:53,balance:943,runway:'18 mo'},
+    {month:'Mar 2026',inflow:232,outflow:175,net:57,balance:1000,runway:'19 mo'},
+    {month:'Apr 2026',inflow:240,outflow:178,net:62,balance:1062,runway:'20 mo'},
+    {month:'May 2026',inflow:248,outflow:180,net:68,balance:1130,runway:'21 mo'},
+    {month:'Jun 2026',inflow:255,outflow:182,net:73,balance:1203,runway:'22 mo'}
+];
+
+document.getElementById('forecastTable').innerHTML = `<div class="table-responsive"><table class="table"><thead><tr><th>Month</th><th>Inflows</th><th>Outflows</th><th>Net</th><th>Balance</th><th>Runway</th></tr></thead><tbody>${FORECAST.map(f =>
+    `<tr><td>${f.month}</td><td class="text-success">$${f.inflow}K</td><td class="text-danger">$${f.outflow}K</td><td class="text-info">+$${f.net}K</td><td style="color:#20c997;font-weight:600;">$${f.balance}K</td><td><span class="badge bg-success">${f.runway}</span></td></tr>`
+).join('')}</tbody></table></div>`;
+
+// Alerts
+const ALERTS = [
+    {alert:'Cash runway healthy at 18+ months',severity:'Good',icon:'bi-check-circle'},
+    {alert:'Q2 tax payment ($45K) due April 15 - factor into planning',severity:'Info',icon:'bi-info-circle'},
+    {alert:'Insurance renewal ($12K) coming in May',severity:'Info',icon:'bi-info-circle'},
+    {alert:'Conservative scenario still maintains positive cash flow',severity:'Good',icon:'bi-check-circle'}
+];
+
+document.getElementById('alerts').innerHTML = ALERTS.map(a => {
+    const color = a.severity==='Good'?'#198754':a.severity==='Warning'?'#ffc107':'#0dcaf0';
+    return `<div class="d-flex align-items-start gap-2 mb-3"><i class="bi ${a.icon}" style="color:${color};margin-top:2px;"></i><span style="font-size:0.9rem;">${a.alert}</span></div>`;
+}).join('');
+
+// Recommendations
+const RECS = [
+    {rec:'Accelerate AR collections to improve DSO from 42 to 35 days',impact:'+$28K cash improvement',priority:'High'},
+    {rec:'Negotiate extended payment terms with top 3 vendors',impact:'+15 days cash float',priority:'High'},
+    {rec:'Consider $200K line of credit as safety buffer',impact:'Extends worst-case runway by 3 months',priority:'Medium'},
+    {rec:'Invest excess cash above $500K in short-term instruments',impact:'$8-12K annual interest income',priority:'Low'}
+];
+
+document.getElementById('recommendations').innerHTML = RECS.map(r => {
+    const color = r.priority==='High'?'#dc3545':r.priority==='Medium'?'#ffc107':'#198754';
+    return `<div class="d-flex align-items-start gap-2 mb-3"><span class="badge" style="background:${color};min-width:50px;font-size:0.7rem;">${r.priority}</span><div><span style="font-size:0.9rem;">${r.rec}</span><br><small class="text-success">${r.impact}</small></div></div>`;
+}).join('');
+</script>
+{% endblock %}

@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% block title %}Industry Benchmarks - {{ app_name }}{% endblock %}
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-start mb-4">
+        <div>
+            <h2><i class="bi bi-bar-chart-line me-2 text-success"></i>Industry Benchmarks</h2>
+            <p class="text-muted">Compare your cash flow KPIs against industry peers with actionable improvement plans</p>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-3"><div class="card text-center p-3"><div class="metric-value" style="color:#198754;">72</div><div class="metric-label">Benchmark Score (100)</div></div></div>
+        <div class="col-md-3"><div class="card text-center p-3"><div class="metric-value" style="color:#198754;">6</div><div class="metric-label">Above Benchmark</div></div></div>
+        <div class="col-md-3"><div class="card text-center p-3"><div class="metric-value" style="color:#ffc107;">3</div><div class="metric-label">Near Benchmark</div></div></div>
+        <div class="col-md-3"><div class="card text-center p-3"><div class="metric-value" style="color:#dc3545;">3</div><div class="metric-label">Below Benchmark</div></div></div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <div class="card mb-4">
+                <div class="card-header"><h5 class="mb-0">Your Performance vs Industry</h5></div>
+                <div class="card-body"><canvas id="radarChart" height="320"></canvas></div>
+            </div>
+            <div class="card">
+                <div class="card-header"><h5 class="mb-0">Detailed KPI Comparison</h5></div>
+                <div class="card-body" id="kpiTable"></div>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="card mb-4">
+                <div class="card-header"><h5 class="mb-0">Category Scores</h5></div>
+                <div class="card-body"><canvas id="categoryChart" height="220"></canvas></div>
+            </div>
+            <div class="card mb-4">
+                <div class="card-header"><h5 class="mb-0">Percentile Ranking</h5></div>
+                <div class="card-body"><canvas id="percentileChart" height="200"></canvas></div>
+            </div>
+            <div class="card">
+                <div class="card-header"><h5 class="mb-0"><i class="bi bi-trophy me-2 text-warning"></i>Improvement Priorities</h5></div>
+                <div class="card-body" id="priorities"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+const KPIS = [
+    {kpi:'Days Cash on Hand',yours:'45 days',benchmark:'60 days',pct:75,status:'below',category:'Liquidity'},
+    {kpi:'Current Ratio',yours:'1.8',benchmark:'1.5',pct:120,status:'above',category:'Liquidity'},
+    {kpi:'Quick Ratio',yours:'1.2',benchmark:'1.0',pct:120,status:'above',category:'Liquidity'},
+    {kpi:'Days Sales Outstanding',yours:'42 days',benchmark:'35 days',pct:83,status:'near',category:'Receivables'},
+    {kpi:'Collection Effectiveness',yours:'82%',benchmark:'90%',pct:91,status:'near',category:'Receivables'},
+    {kpi:'AR Aging >90 Days',yours:'8%',benchmark:'5%',pct:63,status:'below',category:'Receivables'},
+    {kpi:'Days Payables Outstanding',yours:'28 days',benchmark:'35 days',pct:80,status:'below',category:'Payables'},
+    {kpi:'Cash Conversion Cycle',yours:'52 days',benchmark:'45 days',pct:87,status:'near',category:'Efficiency'},
+    {kpi:'Operating Cash Flow Ratio',yours:'1.15',benchmark:'1.0',pct:115,status:'above',category:'Operations'},
+    {kpi:'Free Cash Flow Margin',yours:'8.5%',benchmark:'7%',pct:121,status:'above',category:'Operations'},
+    {kpi:'Cash Flow to Debt Ratio',yours:'0.42',benchmark:'0.35',pct:120,status:'above',category:'Solvency'},
+    {kpi:'Working Capital Ratio',yours:'1.6',benchmark:'1.5',pct:107,status:'above',category:'Efficiency'}
+];
+
+// Radar Chart
+new Chart(document.getElementById('radarChart'), {
+    type: 'radar',
+    data: {
+        labels: ['Liquidity','Receivables','Payables','Efficiency','Operations','Solvency'],
+        datasets: [
+            {label:'Your Company',data:[82,72,65,78,88,85],backgroundColor:'rgba(25,135,84,0.2)',borderColor:'#198754',pointBackgroundColor:'#198754'},
+            {label:'Industry Median',data:[70,70,70,70,70,70],backgroundColor:'rgba(108,117,125,0.1)',borderColor:'#6c757d',borderDash:[5,5],pointBackgroundColor:'#6c757d'},
+            {label:'Top Quartile',data:[90,88,85,88,92,90],backgroundColor:'rgba(13,202,240,0.05)',borderColor:'#0dcaf0',borderDash:[3,3],pointBackgroundColor:'#0dcaf0'}
+        ]
+    },
+    options: {responsive:true, scales:{r:{beginAtZero:true,max:100,grid:{color:'rgba(255,255,255,0.1)'},pointLabels:{color:'var(--muted-color)',font:{size:11}},ticks:{display:false}}}, plugins:{legend:{position:'bottom',labels:{color:'var(--muted-color)'}}}}
+});
+
+// Category Scores
+new Chart(document.getElementById('categoryChart'), {
+    type: 'bar',
+    data: {
+        labels: ['Operations','Solvency','Liquidity','Efficiency','Receivables','Payables'],
+        datasets: [{
+            label:'Score',
+            data:[88,85,82,78,72,65],
+            backgroundColor: function(ctx) {
+                const v = ctx.raw;
+                return v >= 80 ? '#198754' : v >= 70 ? '#ffc107' : '#dc3545';
+            }
+        }]
+    },
+    options: {responsive:true, indexAxis:'y', scales:{x:{min:0,max:100,ticks:{color:'var(--muted-color)'},grid:{color:'rgba(255,255,255,0.05)'}},y:{ticks:{color:'var(--muted-color)'},grid:{color:'rgba(255,255,255,0.1)'}}}, plugins:{legend:{display:false}}}
+});
+
+// Percentile Ranking
+new Chart(document.getElementById('percentileChart'), {
+    type: 'line',
+    data: {
+        labels: ['Q3 2025','Q4 2025','Q1 2026','Q2 2026'],
+        datasets: [{
+            label:'Your Percentile',
+            data:[58,62,68,72],
+            borderColor:'#198754',backgroundColor:'rgba(25,135,84,0.1)',fill:true,tension:0.3
+        }]
+    },
+    options: {responsive:true, scales:{y:{min:0,max:100,ticks:{color:'var(--muted-color)',callback:v=>v+'th'},grid:{color:'rgba(255,255,255,0.1)'}},x:{ticks:{color:'var(--muted-color)'},grid:{color:'rgba(255,255,255,0.05)'}}}, plugins:{legend:{labels:{color:'var(--muted-color)'}}}}
+});
+
+// KPI Table
+document.getElementById('kpiTable').innerHTML = KPIS.map(k => {
+    const statusColor = k.status==='above'?'#198754':k.status==='near'?'#ffc107':'#dc3545';
+    const statusLabel = k.status==='above'?'Above':k.status==='near'?'Near':'Below';
+    const barPct = Math.min(k.pct, 150) / 1.5;
+    return `<div style="padding:10px 14px;border-radius:8px;background:rgba(255,255,255,0.03);margin-bottom:6px;">
+        <div class="d-flex justify-content-between mb-1"><span>${k.kpi}</span><span style="color:${statusColor};font-weight:600;">${statusLabel}</span></div>
+        <div class="d-flex justify-content-between mb-1"><small class="text-muted">Yours: <strong>${k.yours}</strong></small><small class="text-muted">Benchmark: ${k.benchmark}</small></div>
+        <div style="height:6px;border-radius:3px;background:rgba(255,255,255,0.1);overflow:hidden;position:relative;"><div style="height:100%;width:${barPct}%;background:${statusColor};border-radius:3px;"></div><div style="position:absolute;top:-2px;left:66.7%;width:2px;height:10px;background:#fff;opacity:0.4;"></div></div>
+    </div>`;
+}).join('');
+
+// Priorities
+const PRIORITIES = [
+    {area:'Days Cash on Hand',gap:'45 vs 60 day target',action:'Build cash reserve by reducing discretionary spending 10%, target $100K buffer',impact:'Would move from below to above benchmark',priority:'High'},
+    {area:'Days Payables Outstanding',gap:'28 vs 35 day benchmark',action:'Renegotiate vendor terms to Net 35-45, prioritize vendors offering early-pay discounts',impact:'+$35K average cash float improvement',priority:'High'},
+    {area:'AR Aging >90 Days',gap:'8% vs 5% benchmark',action:'Implement automated collection reminders, escalate accounts over 60 days',impact:'Recover $24K in aged receivables',priority:'High'},
+    {area:'DSO Improvement',gap:'42 vs 35 day target',action:'Offer 2% early payment discounts, implement ACH auto-debit for recurring clients',impact:'+$28K cash improvement, faster collections',priority:'Medium'},
+    {area:'Cash Conversion Cycle',gap:'52 vs 45 day target',action:'Optimize inventory turns, accelerate invoicing upon delivery',impact:'7-day cycle reduction, $40K cash improvement',priority:'Medium'}
+];
+
+document.getElementById('priorities').innerHTML = PRIORITIES.map(p => {
+    const color = p.priority==='High'?'#dc3545':'#ffc107';
+    return `<div class="d-flex align-items-start gap-2 mb-3"><span class="badge" style="background:${color};min-width:50px;font-size:0.7rem;">${p.priority}</span><div><strong>${p.area}</strong> <small class="text-danger">(${p.gap})</small><br><small class="text-muted">${p.action}</small><br><small class="text-success">${p.impact}</small></div></div>`;
+}).join('');
+</script>
+{% endblock %}
