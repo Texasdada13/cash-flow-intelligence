@@ -18,6 +18,8 @@ from flask_limiter.util import get_remote_address
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from config.settings import get_config
+from patriot_ui import init_ui
+from patriot_ui.config import NavItem, NavSection
 from src.database.models import db, Company, FinancialPeriod, CashFlowEntry, Forecast, ChatSession, AssessmentResult, Framework, Roadmap, Document
 from src.ai_core.chat_engine import AIChatEngine, ConversationMode, get_chat_engine
 from src.patterns.weighted_scoring import create_smb_cash_flow_engine
@@ -58,6 +60,31 @@ def create_app(config_class=None):
     with app.app_context():
         db.create_all()
         logger.info("Database tables created")
+
+    init_ui(app,
+        product_name="Cash Flow Intelligence",
+        product_icon="bi-cash-stack",
+        show_org_selector=True,
+        nav_sections=[
+            NavSection("Overview", [
+                NavItem("Dashboard", "bi-speedometer2", "/dashboard"),
+                NavItem("AI CFO", "bi-chat-dots", "/chat"),
+            ]),
+            NavSection("Tools", [
+                NavItem("Assessment", "bi-clipboard-data", "/assessment"),
+                NavItem("Cash Flow Assessment", "bi-cash-coin", "/cash-flow-assessment"),
+                NavItem("Forecasting", "bi-graph-up-arrow", "/cash-flow-forecasting"),
+                NavItem("Benchmarks", "bi-trophy", "/industry-benchmarks"),
+                NavItem("Frameworks", "bi-grid-3x3-gap", "/frameworks"),
+                NavItem("Reports", "bi-file-text", "/reports"),
+            ]),
+            NavSection("Generate", [
+                NavItem("Framework Generator", "bi-gear", "/framework-generator"),
+                NavItem("Report Generator", "bi-journal-text", "/report-generator"),
+                NavItem("History", "bi-clock-history", "/history"),
+            ]),
+        ]
+    )
 
     # =============================================================================
     # Routes - Pages

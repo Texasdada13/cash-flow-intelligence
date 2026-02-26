@@ -40,3 +40,6 @@ requests==2.31.0
 # Utilities
 uuid==1.30
 gunicorn==21.2.0
+
+# Patriot UI Kit
+git+https://github.com/Texasdada13/patriot-ui-kit.git@main

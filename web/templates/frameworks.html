@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 
 {% block title %}Framework Generator - {{ app_name }}{% endblock %}
+{% block page_title %}Frameworks{% endblock %}
 
 {% block content %}
-<div class="container py-4">
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/">Home</a></li>
@@ -166,7 +166,7 @@
 <!-- Framework Viewer Modal -->
 <div class="modal fade" id="frameworkViewerModal" tabindex="-1">
     <div class="modal-dialog modal-xl">
-        <div class="modal-content" style="background: var(--card-bg);">
+        <div class="modal-content" style="background: var(--pt-bg-surface);">
             <div class="modal-header">
                 <h5 class="modal-title" id="frameworkViewerTitle"></h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -186,7 +186,7 @@
 <!-- Assessment Selection Modal -->
 <div class="modal fade" id="assessmentSelectModal" tabindex="-1">
     <div class="modal-dialog">
-        <div class="modal-content" style="background: var(--card-bg);">
+        <div class="modal-content" style="background: var(--pt-bg-surface);">
             <div class="modal-header">
                 <h5 class="modal-title"><i class="bi bi-clipboard-check me-2"></i>Select Assessment (Optional)</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
